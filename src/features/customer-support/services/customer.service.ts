@@ -30,6 +30,23 @@ class CustomerService {
     }
   }
 
+  async getStoreDetails(storeId: string): Promise<StoreUsersResponse | null> {
+    try {
+      const response = await axios.get<ApiResponse<StoreUsersResponse>>(
+        `${API_BASE_URL}/auth/stores/${storeId}`
+      );
+      
+      if (response.data.response_code === 200 && response.data.response_body) {
+        return response.data.response_body;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error fetching store details:', error);
+      return null;
+    }
+  }
+
   async getStoreUsers(storeId: string): Promise<StoreUsersResponse | null> {
     try {
       const response = await axios.get<ApiResponse<StoreUsersResponse>>(

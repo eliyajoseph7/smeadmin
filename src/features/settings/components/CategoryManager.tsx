@@ -4,13 +4,9 @@ import { Button } from '../../../components/ui/Button';
 import { Modal } from '../../../components/ui/Modal';
 import { 
   Plus,
-  Search,
   Edit,
   Trash2,
-  Tag,
-  AlertCircle,
-  CheckCircle,
-  Palette
+  Tag
 } from 'lucide-react';
 import { categoryApi } from '../services/product-service';
 import type { Category } from '../services/product-service';
@@ -72,7 +68,10 @@ export const CategoryManager: React.FC = () => {
     setFormLoading(true);
     try {
       if (editingCategory) {
-        // TODO: Implement update when API is ready
+        const response = await categoryApi.update(editingCategory.id, formData);
+        setCategories(categories.map(category => 
+          category.id === editingCategory.id ? response : category
+        ));
         toast.success('Category updated successfully');
       } else {
         await categoryApi.create(formData);

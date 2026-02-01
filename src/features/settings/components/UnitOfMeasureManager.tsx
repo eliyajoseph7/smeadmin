@@ -7,9 +7,7 @@ import {
   Search,
   Edit,
   Trash2,
-  Package,
-  AlertCircle,
-  CheckCircle
+  Package
 } from 'lucide-react';
 import { unitOfMeasureApi, type UnitOfMeasure } from '../services/product-service';
 import toast from 'react-hot-toast';
@@ -76,10 +74,16 @@ export const UnitOfMeasureManager: React.FC = () => {
     setFormLoading(true);
     try {
       if (editingUnit) {
-        // TODO: Implement update when API is ready
+        const response = await unitOfMeasureApi.update(editingUnit.id, {
+          ...formData,
+          isActive: editingUnit.isActive
+        });
+        setUnits(units.map(unit => 
+          unit.id === editingUnit.id ? response : unit
+        ));
         toast.success('Unit of measure updated successfully');
       } else {
-        const response = await unitOfMeasureApi.create(formData);
+        await unitOfMeasureApi.create(formData);
         toast.success('Unit of measure created successfully');
       }
       resetForm();

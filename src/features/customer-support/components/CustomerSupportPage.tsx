@@ -61,8 +61,13 @@ export const CustomerSupportPage: React.FC = () => {
   };
 
   const handleStoreClick = (storeId: string) => {
+    const store = customer?.stores.find(s => s.store_id === storeId);
     navigate(`/customer-support/store/${storeId}`, {
-      state: { userId: customer?.user_id }
+      state: { 
+        userId: customer?.user_id,
+        storeData: store,
+        customerData: customer
+      }
     });
   };
 
@@ -227,7 +232,7 @@ export const CustomerSupportPage: React.FC = () => {
                     <ShoppingBag className="w-6 h-6 text-primary-600 mr-3" />
                     <div>
                       <p className="text-sm text-gray-500">Total Stores</p>
-                      <p className="font-semibold text-gray-900">{customer.number_of_stores}</p>
+                      <p className="font-semibold text-gray-900">{customer.stores.length}</p>
                     </div>
                   </div>
                 </div>

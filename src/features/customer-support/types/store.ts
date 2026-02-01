@@ -14,13 +14,12 @@ export interface StoreUsersResponse {
 
 export interface StoreUser {
   userId: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   phoneNumber: string;
   email: string;
   role: string;
   isActive: boolean;
-  createdAt: string;
+  addedAt: string;
   lastLogin?: string;
 }
 
@@ -72,13 +71,16 @@ export interface PurchasePlansResponse {
 }
 
 export interface PurchasePlan {
-  purchasePlanId: string;
+  id: string;
   planName: string;
-  supplierName: string;
-  totalAmount: number;
+  description: string;
+  purchaseType: string;
   status: string;
+  totalItems: number;
+  totalEstimatedCost: number;
+  totalActualCost: number;
   createdAt: string;
-  items: PurchasePlanItem[];
+  items?: PurchasePlanItem[];
 }
 
 export interface PurchasePlanItem {
@@ -97,18 +99,25 @@ export interface SalesResponse {
 }
 
 export interface Sale {
-  saleId: string;
+  id: string;
   saleNumber: string;
   customerName?: string;
   customerPhone?: string;
   saleType: 'DIRECT' | 'QUOTATION';
+  saleStatus: string;
+  totalItems: number;
+  totalQuantity: number;
+  subtotal: number;
   totalAmount: number;
+  totalProfit: number;
+  profitMarginPercentage: number;
+  paymentMethod: string;
   paidAmount: number;
   remainingAmount: number;
   paymentStatus: string;
-  saleStatus: string;
   createdAt: string;
-  items: SaleItem[];
+  saleDate: string;
+  items?: SaleItem[];
 }
 
 export interface SaleItem {

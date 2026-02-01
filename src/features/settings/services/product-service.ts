@@ -1,10 +1,7 @@
 import { ApiClient } from '../../../services/network/api-client';
 import type { 
   UnitOfMeasure, 
-  Category, 
-  CreateUnitOfMeasureRequest, 
-  CreateCategoryRequest 
-} from '../../../models/product.model';
+  Category} from '../../../models/product.model';
 import type { 
   DiscountOption, 
   CreateDiscountOptionRequest 
@@ -69,6 +66,22 @@ class ProductApiService {
     return this.searchUnitsOfMeasure();
   }
 
+  /**
+   * Update Unit of Measure
+   */
+  async updateUnitOfMeasure(id: string, data: Partial<Omit<UnitOfMeasure, 'id' | 'createdAt' | 'updatedAt'>>): Promise<UnitOfMeasure> {
+    const response = await this.apiClient.put<ApiResponse<UnitOfMeasure>>(
+      `/product-service/units-of-measure/${id}`,
+      data
+    );
+    
+    if (!response.isSuccessful || !response.data?.response_body) {
+      throw new Error(response.data?.message || 'Failed to update unit of measure');
+    }
+    
+    return response.data.response_body;
+  }
+
   // ==================== CATEGORY ENDPOINTS ====================
 
   /**
@@ -97,6 +110,22 @@ class ProductApiService {
     
     if (!response.isSuccessful || !response.data?.response_body) {
       throw new Error(response.data?.message || 'Failed to get categories');
+    }
+    
+    return response.data.response_body;
+  }
+
+  /**
+   * Update Category
+   */
+  async updateCategory(id: string, data: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Category> {
+    const response = await this.apiClient.put<ApiResponse<Category>>(
+      `/product-service/categories/${id}`,
+      data
+    );
+    
+    if (!response.isSuccessful || !response.data?.response_body) {
+      throw new Error(response.data?.message || 'Failed to update category');
     }
     
     return response.data.response_body;
@@ -263,6 +292,8 @@ export const unitOfMeasureApi = {
     productApiService.searchUnitsOfMeasure(name),
   getAll: () => 
     productApiService.getAllUnitsOfMeasure(),
+  update: (id: string, data: Partial<Omit<UnitOfMeasure, 'id' | 'createdAt' | 'updatedAt'>>) => 
+    productApiService.updateUnitOfMeasure(id, data),
 };
 
 export const categoryApi = {
@@ -270,6 +301,8 @@ export const categoryApi = {
     productApiService.createCategory(data),
   getAll: () => 
     productApiService.getAllCategories(),
+  update: (id: string, data: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>) => 
+    productApiService.updateCategory(id, data),
 };
 
 // Payment API methods

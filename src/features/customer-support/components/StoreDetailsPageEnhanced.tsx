@@ -9,9 +9,6 @@ import {
   Users, 
   CreditCard,
   Loader2,
-  CheckCircle,
-  Clock,
-  XCircle,
   Hash,
   MapPin,
   Phone,
@@ -47,7 +44,14 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const userId = (location.state as { userId?: string })?.userId;
+  const locationState = location.state as { 
+    userId?: string;
+    storeData?: any;
+    customerData?: any;
+  };
+  const userId = locationState?.userId;
+  const passedStoreData = locationState?.storeData;
+  // const customerData = locationState?.customerData;
   
   const [activeTab, setActiveTab] = useState<TabType>('products');
   const [isLoading, setIsLoading] = useState(false);
@@ -65,14 +69,36 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
     
     const loadStoreInfo = async () => {
       if (!storeUsers) {
-        const data = await customerService.getStoreUsers(storeId);
-        setStoreUsers(data);
+        if (passedStoreData) {
+          // Use passed store data instead of API call
+          console.log('Using passed store data:', passedStoreData);
+          const storeUsersData: StoreUsersResponse = {
+            store_id: passedStoreData.store_id,
+            store_number: passedStoreData.store_number,
+            store_name: passedStoreData.store_name,
+            store_code: passedStoreData.store_code || `STORE-${passedStoreData.store_number}`,
+            store_location: passedStoreData.store_location,
+            staff_phone_number: passedStoreData.staff_phone_number,
+            store_description: passedStoreData.store_description,
+            created_at: passedStoreData.created_at,
+            total_users: 1, // Default value, will be updated when users tab is loaded
+            is_active: true, // Default to active
+            users: [] // Will be populated when users tab is loaded
+          };
+          setStoreUsers(storeUsersData);
+        } else {
+          // Fallback to API call if no data passed
+          console.log('No passed data, loading store details for storeId:', storeId);
+          const data = await customerService.getStoreDetails(storeId);
+          console.log('Store details response:', data);
+          setStoreUsers(data);
+        }
       }
     };
 
     loadStoreInfo();
     loadTabData('products');
-  }, [storeId]);
+  }, [storeId, passedStoreData]);
 
   const loadTabData = async (tab: TabType) => {
     if (!storeId) return;
@@ -114,10 +140,20 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
           }
           break;
         case 'users':
-          if (!storeUsers) {
+          if (!storeUsers?.users || storeUsers.users.length === 0) {
             console.log('Fetching users...');
-            const data = await customerService.getStoreUsers(storeId);
-            setStoreUsers(data);
+            const userData = await customerService.getStoreUsers(storeId);
+            if (userData && storeUsers) {
+              // Merge user data with existing store details
+              setStoreUsers({
+                ...storeUsers,
+                users: userData.users,
+                total_users: userData.total_users || userData.users?.length || 0
+              });
+            } else if (userData) {
+              // Fallback if no existing store data
+              setStoreUsers(userData);
+            }
           }
           break;
         case 'payments':
@@ -184,11 +220,11 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
           </Button>
-          <Button variant="outline" size="sm" className="flex items-center space-x-2">
+          <Button variant="secondary" size="sm" className="flex items-center space-x-2">
             <Download className="w-4 h-4" />
             <span>Export</span>
           </Button>
-          <Button variant="outline" size="sm" className="flex items-center space-x-2">
+          <Button variant="secondary" size="sm" className="flex items-center space-x-2">
             <RefreshCw className="w-4 h-4" />
             <span>Refresh</span>
           </Button>
@@ -302,11 +338,11 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
               <div className="p-3 bg-green-100 rounded-xl">
                 <TrendingUp className="w-6 h-6 text-green-600" />
               </div>
-              <span className="text-xs font-medium text-green-600 bg-green-100 px-3 py-1 rounded-full">+12.5%</span>
+              <span className="text-xs font-medium text-green-600 bg-green-100 px-3 py-1 rounded-full"></span>
             </div>
             <h3 className="text-sm font-medium text-gray-600 mb-1">Total Sales</h3>
-            <p className="text-2xl font-bold text-gray-900">{formatCurrency(sales?.total_items ? sales.total_items * 25000 : 0)}</p>
-            <p className="text-xs text-gray-500 mt-1">Last 30 days</p>
+            <p className="text-2xl font-bold text-gray-900">{formatCurrency(sales?.content?.reduce((total, sale) => total + sale.totalAmount, 0) || 0)}</p>
+            <p className="text-xs text-gray-500 mt-1">Sales</p>
           </Card>
 
           <Card className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:shadow-lg transition-shadow">
@@ -326,11 +362,11 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
               <div className="p-3 bg-purple-100 rounded-xl">
                 <ShoppingCart className="w-6 h-6 text-purple-600" />
               </div>
-              <span className="text-xs font-medium text-purple-600 bg-purple-100 px-3 py-1 rounded-full">+8.2%</span>
+              <span className="text-xs font-medium text-purple-600 bg-purple-100 px-3 py-1 rounded-full"></span>
             </div>
-            <h3 className="text-sm font-medium text-gray-600 mb-1">Total Orders</h3>
+            <h3 className="text-sm font-medium text-gray-600 mb-1">Total Purchases</h3>
             <p className="text-2xl font-bold text-gray-900">{purchases?.totalElements || 0}</p>
-            <p className="text-xs text-gray-500 mt-1">This month</p>
+            <p className="text-xs text-gray-500 mt-1">Purchases</p>
           </Card>
 
           <Card className="p-6 bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200 hover:shadow-lg transition-shadow">
@@ -357,15 +393,15 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
             <div className="flex items-center space-x-4">
               <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
               <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" className="flex items-center space-x-2 hover:bg-blue-50">
+                <Button variant="secondary" size="sm" className="flex items-center space-x-2 hover:bg-blue-50">
                   <BarChart3 className="w-4 h-4" />
                   <span>Analytics</span>
                 </Button>
-                <Button variant="outline" size="sm" className="flex items-center space-x-2 hover:bg-red-50">
+                <Button variant="secondary" size="sm" className="flex items-center space-x-2 hover:bg-red-50">
                   <AlertCircle className="w-4 h-4" />
                   <span>Alerts</span>
                 </Button>
-                <Button variant="outline" size="sm" className="flex items-center space-x-2 hover:bg-yellow-50">
+                <Button variant="secondary" size="sm" className="flex items-center space-x-2 hover:bg-yellow-50">
                   <Zap className="w-4 h-4" />
                   <span>Automation</span>
                 </Button>
@@ -382,7 +418,7 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
                   className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent w-64"
                 />
               </div>
-              <Button variant="outline" size="sm" className="hover:bg-gray-50">
+              <Button variant="secondary" size="sm" className="hover:bg-gray-50">
                 <Filter className="w-4 h-4" />
               </Button>
             </div>
@@ -441,13 +477,9 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm" className='flex'>
+                        <Button variant="secondary" size="sm" className='flex'>
                           <Download className="w-4 h-4 mr-2" />
                           Export
-                        </Button>
-                        <Button size="sm" className='flex'>
-                          <Package className="w-4 h-4 mr-2" />
-                          Add Product
                         </Button>
                       </div>
                     </div>
@@ -525,7 +557,7 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
                           <option value="DIRECT">Direct Sales</option>
                           <option value="QUOTATION">Quotations</option>
                         </select>
-                        <Button variant="outline" size="sm" className="flex">
+                        <Button variant="secondary" size="sm" className="flex">
                           <Download className="w-4 h-4 mr-2" />
                           Export
                         </Button>
@@ -672,7 +704,7 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
                           {expenses.total} expenses
                         </span>
                       </div>
-                      <Button variant="outline" size="sm" className="flex">
+                      <Button variant="secondary" size="sm" className="flex">
                         <Download className="w-4 h-4 mr-2" />
                         Export
                       </Button>
@@ -747,7 +779,7 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
                           {storeUsers.total_users} users
                         </span>
                       </div>
-                      <Button variant="outline" size="sm" className="flex">
+                      <Button variant="secondary" size="sm" className="flex">
                         <Download className="w-4 h-4 mr-2" />
                         Export
                       </Button>
@@ -811,7 +843,7 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
                           {payments.response_body.length} payments
                         </span>
                       </div>
-                      <Button variant="outline" size="sm" className="flex">
+                      <Button variant="secondary" size="sm" className="flex">
                         <Download className="w-4 h-4 mr-2" />
                         Export
                       </Button>
