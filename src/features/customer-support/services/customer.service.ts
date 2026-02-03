@@ -1,4 +1,3 @@
-import axios from 'axios';
 import type { Customer, ApiResponse } from '../types/customer';
 import type { 
   StoreUsersResponse, 
@@ -10,16 +9,19 @@ import type {
 } from '../types/store';
 import { ApiClient } from '../../../services/network/api-client';
 
-const API_BASE_URL = ApiClient.getInstance().baseUrl;
-
 class CustomerService {
+  private apiClient: ApiClient;
+
+  constructor() {
+    this.apiClient = ApiClient.getInstance();
+  }
   async searchByPhone(phoneNumber: string): Promise<Customer | null> {
     try {
-      const response = await axios.get<ApiResponse<Customer>>(
-        `${API_BASE_URL}/auth/user-details/${encodeURIComponent(phoneNumber)}`
+      const response = await this.apiClient.get<ApiResponse<Customer>>(
+        `/auth/user-details/${encodeURIComponent(phoneNumber)}`
       );
       
-      if (response.data.response_code === 200 && response.data.response_body) {
+      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
         return response.data.response_body;
       }
       
@@ -32,11 +34,11 @@ class CustomerService {
 
   async getStoreDetails(storeId: string): Promise<StoreUsersResponse | null> {
     try {
-      const response = await axios.get<ApiResponse<StoreUsersResponse>>(
-        `${API_BASE_URL}/auth/stores/${storeId}`
+      const response = await this.apiClient.get<ApiResponse<StoreUsersResponse>>(
+        `/auth/stores/${storeId}`
       );
       
-      if (response.data.response_code === 200 && response.data.response_body) {
+      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
         return response.data.response_body;
       }
       
@@ -49,11 +51,11 @@ class CustomerService {
 
   async getStoreUsers(storeId: string): Promise<StoreUsersResponse | null> {
     try {
-      const response = await axios.get<ApiResponse<StoreUsersResponse>>(
-        `${API_BASE_URL}/auth/stores/${storeId}/users`
+      const response = await this.apiClient.get<ApiResponse<StoreUsersResponse>>(
+        `/auth/stores/${storeId}/users`
       );
       
-      if (response.data.response_code === 200 && response.data.response_body) {
+      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
         return response.data.response_body;
       }
       
@@ -66,11 +68,11 @@ class CustomerService {
 
   async getStoreProducts(storeId: string, page: number = 0, size: number = 20): Promise<ProductsResponse | null> {
     try {
-      const response = await axios.get<ApiResponse<ProductsResponse>>(
-        `${API_BASE_URL}/product-service/products/store/${storeId}?page=${page}&size=${size}`
+      const response = await this.apiClient.get<ApiResponse<ProductsResponse>>(
+        `/product-service/products/store/${storeId}?page=${page}&size=${size}`
       );
       
-      if (response.data.response_code === 200 && response.data.response_body) {
+      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
         return response.data.response_body;
       }
       
@@ -83,11 +85,11 @@ class CustomerService {
 
   async getStorePurchasePlans(storeId: string, page: number = 0, size: number = 20): Promise<PurchasePlansResponse | null> {
     try {
-      const response = await axios.get<ApiResponse<PurchasePlansResponse>>(
-        `${API_BASE_URL}/purchase-service/purchase-plans?storeId=${storeId}&page=${page}&size=${size}`
+      const response = await this.apiClient.get<ApiResponse<PurchasePlansResponse>>(
+        `/purchase-service/purchase-plans?storeId=${storeId}&page=${page}&size=${size}`
       );
       
-      if (response.data.response_code === 200 && response.data.response_body) {
+      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
         return response.data.response_body;
       }
       
@@ -100,11 +102,11 @@ class CustomerService {
 
   async getStoreSales(storeId: string, saleType: 'QUOTATION' | 'DIRECT' = 'DIRECT', page: number = 0, size: number = 20): Promise<SalesResponse | null> {
     try {
-      const response = await axios.get<ApiResponse<SalesResponse>>(
-        `${API_BASE_URL}/sale-service/sales/store/${storeId}?saleType=${saleType}&page=${page}&size=${size}`
+      const response = await this.apiClient.get<ApiResponse<SalesResponse>>(
+        `/sale-service/sales/store/${storeId}?saleType=${saleType}&page=${page}&size=${size}`
       );
       
-      if (response.data.response_code === 200 && response.data.response_body) {
+      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
         return response.data.response_body;
       }
       
@@ -117,11 +119,11 @@ class CustomerService {
 
   async getStoreExpenses(storeId: string): Promise<ExpensesResponse | null> {
     try {
-      const response = await axios.get<ApiResponse<ExpensesResponse>>(
-        `${API_BASE_URL}/purchase-service/expenses?storeId=${storeId}`
+      const response = await this.apiClient.get<ApiResponse<ExpensesResponse>>(
+        `/purchase-service/expenses?storeId=${storeId}`
       );
       
-      if (response.data.response_code === 200 && response.data.response_body) {
+      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
         return response.data.response_body;
       }
       
@@ -134,11 +136,11 @@ class CustomerService {
 
   async getUserPayments(userId: string): Promise<PaymentsResponse | null> {
     try {
-      const response = await axios.get<PaymentsResponse>(
-        `${API_BASE_URL}/payment-service/payments/user/${userId}/all`
+      const response = await this.apiClient.get<PaymentsResponse>(
+        `/payment-service/payments/user/${userId}/all`
       );
       
-      if (response.data.response_code === 200 && response.data.response_body) {
+      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
         return response.data;
       }
       

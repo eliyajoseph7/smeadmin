@@ -1,6 +1,7 @@
 // API Client matching smeweb structure
 import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { JwtTokenGenerator } from '../auth/jwt-token-generator';
 
 export interface ApiResponse<T> {
   statusCode: number;
@@ -23,9 +24,10 @@ export type AppVersionProvider = () => Promise<string | null>;
 export class ApiClient {
   private static instance: ApiClient;
   private axiosInstance: AxiosInstance;
-  public baseUrl = 'http://209.38.120.33:8080/api/v1';
+  // public baseUrl = 'http://209.38.120.33:8080/api/v1';
+  public baseUrl = 'http://188.166.5.174:8080/api/v1';
   private timeout = 20000; // 20 seconds
-  private authTokenProvider?: AuthTokenProvider;
+  // private authTokenProvider?: AuthTokenProvider;
   private deviceIdProvider?: DeviceIdProvider;
   private appVersionProvider?: AppVersionProvider;
 
@@ -68,7 +70,7 @@ export class ApiClient {
       this.axiosInstance.defaults.timeout = this.timeout;
     }
 
-    this.authTokenProvider = config.authTokenProvider;
+    // this.authTokenProvider = config.authTokenProvider;
     this.deviceIdProvider = config.deviceIdProvider;
     this.appVersionProvider = config.appVersionProvider;
   }
@@ -77,10 +79,17 @@ export class ApiClient {
     // Request interceptor for adding auth headers
     this.axiosInstance.interceptors.request.use(
       async (config) => {
-        // Add auth token
-        const token = await this.authTokenProvider?.();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+        // Generate fresh JWT token for each request (expires in 2 minutes)
+        try {
+          config.headers.Authorization = JwtTokenGenerator.getAuthorizationHeader();
+          if (import.meta.env?.DEV) {
+            console.log('🔐 Using fresh JWT token for API request');
+          }
+        } catch (error) {
+          if (import.meta.env?.DEV) {
+            console.error('❌ Failed to generate JWT token:', error);
+          }
+          // Continue without token - let server handle authentication error
         }
 
         // Add device ID

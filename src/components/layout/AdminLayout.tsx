@@ -14,7 +14,8 @@ import {
   User,
   LogOut,
   Store,
-  MessageSquare
+  MessageSquare,
+  Shield
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -38,6 +39,7 @@ const navigation: NavigationItem[] = [
   { name: 'Orders', href: '/orders', icon: FileText },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Customer Support', href: '/customer-support', icon: MessageSquare },
+  { name: 'Admin Management', href: '/admin-management', icon: Shield },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
