@@ -16,13 +16,12 @@ export class AppVersionApiService {
   }
 
   /**
-   * Check for app updates for a specific version
-   * GET /api/v1/auth/version/check/{version}
+   * Check for app updates for a specific platform
+   * GET /api/v1/auth/version/check/{platform}
    */
-  async checkForUpdates(): Promise<AppVersionCheckResponse> {
-    const response = await this.apiClient.get<AppVersionCheckResponse>(
-      `/auth/version/check`
-    );
+  async checkForUpdates(platform?: 'android' | 'ios'): Promise<AppVersionCheckResponse> {
+    const endpoint = platform ? `/auth/version/check/${platform}` : `/auth/version/check`;
+    const response = await this.apiClient.get<AppVersionCheckResponse>(endpoint);
     return response.data;
   }
 
@@ -54,9 +53,9 @@ export class AppVersionApiService {
    * Delete an app version by version string
    * DELETE /api/v1/auth/version/{version}
    */
-  async deleteVersion(version: string): Promise<DeleteVersionResponse> {
+  async deleteVersion(id: string): Promise<DeleteVersionResponse> {
     const response = await this.apiClient.delete<DeleteVersionResponse>(
-      `/auth/version/${version}`
+      `/auth/version/${id}`
     );
     return response.data;
   }

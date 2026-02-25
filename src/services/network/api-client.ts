@@ -24,8 +24,8 @@ export type AppVersionProvider = () => Promise<string | null>;
 export class ApiClient {
   private static instance: ApiClient;
   private axiosInstance: AxiosInstance;
-  // public baseUrl = 'http://209.38.120.33:8080/api/v1';
-  public baseUrl = 'http://188.166.5.174:8080/api/v1';
+  // public baseUrl = 'https://api-uat.rino.co.tz/api/v1';
+  public baseUrl = 'https://api.rino.co.tz/api/v1';
   private timeout = 20000; // 20 seconds
   // private authTokenProvider?: AuthTokenProvider;
   private deviceIdProvider?: DeviceIdProvider;

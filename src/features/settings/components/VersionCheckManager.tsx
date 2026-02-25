@@ -14,10 +14,13 @@ import {
   Eye
 } from 'lucide-react';
 import { AppVersionApiService } from '../../../services/api/app-version-api-service';
-import type { AppVersion, AppVersionCheckResponse, CreateAppVersionRequest, UpdateAppVersionRequest, UpdatePriority } from '../../../models/app-version';
+import type { AppVersion, AppVersionCheckResponse, CreateAppVersionRequest, UpdateAppVersionRequest, UpdatePriority, PlatformType } from '../../../models/app-version';
 import DeleteConfirmationModal from '../../../components/ui/DeleteConfirmationModal';
 
+type PlatformTab = 'android' | 'ios';
+
 export const VersionCheckManager: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<PlatformTab>('android');
   const [versions, setVersions] = useState<AppVersion[]>([]);
   const [currentVersion, setCurrentVersion] = useState<AppVersionCheckResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -31,6 +34,7 @@ export const VersionCheckManager: React.FC = () => {
     latest_version: '',
     minimum_required_version: '',
     update_priority: 'recommended',
+    platform_type: 'android',
     release_notes: '',
     release_date: new Date().toISOString(),
     download_url: {
@@ -52,24 +56,59 @@ export const VersionCheckManager: React.FC = () => {
     { value: 'critical', label: 'Critical', color: 'bg-red-50 text-red-700 border-red-200' }
   ];
 
+  const platformOptions: { value: PlatformType; label: string; icon: string }[] = [
+    { value: 'android', label: 'Android', icon: '🤖' },
+    { value: 'ios', label: 'iOS', icon: '🍎' }
+  ];
+
+  const getPlatformConfig = (platform: PlatformType | string) => {
+    const normalizedPlatform = platform.toLowerCase();
+    return platformOptions.find(option => option.value === normalizedPlatform) || platformOptions[0];
+  };
+
+  const getPlatformDisplayConfig = (platform: string) => {
+    const normalizedPlatform = platform.toLowerCase();
+    if (normalizedPlatform === 'all') {
+      return { value: 'all', label: 'All Platforms', icon: '📱' };
+    }
+    return getPlatformConfig(normalizedPlatform);
+  };
+
   useEffect(() => {
     loadVersionData();
-  }, []);
+  }, [activeTab]);
 
   const loadVersionData = async () => {
     try {
       setLoading(true);
       
-      // Check for updates using current version
-      const updateCheck = await versionService.checkForUpdates();
-      setCurrentVersion(updateCheck);
+      // Clear current version state first
+      setCurrentVersion(null);
+      setVersions([]);
+      
+      // Check for updates using current version for the active platform
+      try {
+        const updateCheck = await versionService.checkForUpdates(activeTab);
+        setCurrentVersion(updateCheck);
+      } catch (versionError: any) {
+        // Handle case where no version exists for this platform
+        console.log(`No version found for platform ${activeTab}:`, versionError);
+        setCurrentVersion(null);
+      }
 
-      // Load version history
+      // Load version history and filter by platform
       const history = await versionService.getVersionHistory(0, 20);
-      setVersions(history.response_body);
+      const platformVersions = history.response_body.filter(version => {
+        const platformType = version.platform_type.toLowerCase();
+        return platformType === activeTab || platformType === 'all';
+      });
+      setVersions(platformVersions);
     } catch (error) {
       console.error('Failed to load version data:', error);
       toast.error('Failed to load version information');
+      // Clear state on error
+      setCurrentVersion(null);
+      setVersions([]);
     } finally {
       setLoading(false);
     }
@@ -85,6 +124,17 @@ export const VersionCheckManager: React.FC = () => {
 
     if (!formData.release_notes.trim()) {
       toast.error('Release notes are required');
+      return;
+    }
+
+    // Validate platform-specific download URL
+    if (formData.platform_type === 'android' && !formData.download_url.android.trim()) {
+      toast.error('Android download URL is required for Android platform');
+      return;
+    }
+
+    if (formData.platform_type === 'ios' && !formData.download_url.ios.trim()) {
+      toast.error('iOS download URL is required for iOS platform');
       return;
     }
 
@@ -115,7 +165,7 @@ export const VersionCheckManager: React.FC = () => {
 
     setLoading(true);
     try {
-      await versionService.deleteVersion(deleteVersion.latest_version);
+      await versionService.deleteVersion(deleteVersion.id);
       toast.success('Version deleted successfully');
       setDeleteVersion(null);
       loadVersionData();
@@ -133,6 +183,7 @@ export const VersionCheckManager: React.FC = () => {
       latest_version: '',
       minimum_required_version: '',
       update_priority: 'recommended',
+      platform_type: activeTab,
       release_notes: '',
       release_date: new Date().toISOString(),
       download_url: {
@@ -154,6 +205,7 @@ export const VersionCheckManager: React.FC = () => {
       latest_version: version.latest_version,
       minimum_required_version: version.minimum_required_version,
       update_priority: version.update_priority,
+      platform_type: version.platform_type.toLowerCase() as PlatformType,
       release_notes: version.release_notes,
       release_date: version.release_date,
       download_url: {
@@ -206,11 +258,29 @@ export const VersionCheckManager: React.FC = () => {
 
   const isLatestVersion = (version: AppVersion) => {
     if (versions.length === 0) return false;
-    // Sort versions by release date and compare with the first (latest) one
-    const sortedVersions = [...versions].sort((a, b) => 
+    
+    // Filter versions by current platform (excluding ALL platform versions for this check)
+    const platformSpecificVersions = versions.filter(v => {
+      const versionPlatform = v.platform_type.toLowerCase();
+      return versionPlatform === activeTab;
+    });
+    
+    // If no platform-specific versions, check if this is the latest among ALL platform versions
+    if (platformSpecificVersions.length === 0) {
+      const allPlatformVersions = versions.filter(v => v.platform_type.toLowerCase() === 'all');
+      if (allPlatformVersions.length === 0) return false;
+      
+      const sortedAllVersions = [...allPlatformVersions].sort((a, b) => 
+        new Date(b.release_date).getTime() - new Date(a.release_date).getTime()
+      );
+      return sortedAllVersions[0]?.id === version.id;
+    }
+    
+    // Sort platform-specific versions by release date and compare with the first (latest) one
+    const sortedVersions = [...platformSpecificVersions].sort((a, b) => 
       new Date(b.release_date).getTime() - new Date(a.release_date).getTime()
     );
-    return sortedVersions[0]?.latest_version === version.latest_version;
+    return sortedVersions[0]?.id === version.id;
   };
 
   return (
@@ -230,11 +300,36 @@ export const VersionCheckManager: React.FC = () => {
         </Button>
       </div>
 
+      {/* Platform Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          {platformOptions.map((platform) => (
+            <button
+              key={platform.value}
+              onClick={() => setActiveTab(platform.value)}
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                activeTab === platform.value
+                  ? 'border-primary-500 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <span className="flex items-center space-x-2">
+                <span>{platform.icon}</span>
+                <span>{platform.label} Versions</span>
+              </span>
+            </button>
+          ))}
+        </nav>
+      </div>
+
       {/* Current Version Info */}
       {currentVersion && (
         <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-blue-900">Current Active Version</h3>
+            <h3 className="text-lg font-semibold text-blue-900 flex items-center space-x-2">
+              <span>{getPlatformConfig(activeTab).icon}</span>
+              <span>Current {getPlatformConfig(activeTab).label} Version</span>
+            </h3>
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityConfig(currentVersion.update_priority).color}`}>
               {getPriorityConfig(currentVersion.update_priority).label}
             </span>
@@ -269,24 +364,28 @@ export const VersionCheckManager: React.FC = () => {
             <div>
               <p className="text-sm text-blue-600 font-medium mb-2">Download Links</p>
               <div className="flex flex-col space-y-2">
-                <a
-                  href={currentVersion.download_url.android}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-3 py-1 rounded-md text-xs bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
-                >
-                  <Download className="w-3 h-3 mr-1" />
-                  Android
-                </a>
-                <a
-                  href={currentVersion.download_url.ios}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-3 py-1 rounded-md text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
-                >
-                  <Download className="w-3 h-3 mr-1" />
-                  iOS
-                </a>
+                {(currentVersion.platform_type.toLowerCase() === 'android' || currentVersion.platform_type.toLowerCase() === 'all') && (
+                  <a
+                    href={currentVersion.download_url.android}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-3 py-1 rounded-md text-xs bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                  >
+                    <Download className="w-3 h-3 mr-1" />
+                    Android
+                  </a>
+                )}
+                {(currentVersion.platform_type.toLowerCase() === 'ios' || currentVersion.platform_type.toLowerCase() === 'all') && (
+                  <a
+                    href={currentVersion.download_url.ios}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-3 py-1 rounded-md text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                  >
+                    <Download className="w-3 h-3 mr-1" />
+                    iOS
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -356,8 +455,9 @@ export const VersionCheckManager: React.FC = () => {
       {/* Versions Table */}
       <Card className="overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Version History ({versions.length})
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+            <span>{getPlatformConfig(activeTab).icon}</span>
+            <span>{getPlatformConfig(activeTab).label} Version History ({versions.length})</span>
           </h3>
         </div>
         
@@ -432,26 +532,19 @@ export const VersionCheckManager: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-5">
-                        <div className="flex space-x-2">
-                          <a
-                            href={version.download_url.android}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center space-x-1 px-2 py-1 rounded text-xs bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
-                          >
-                            <Download className="w-3 h-3" />
-                            <span>Android</span>
-                          </a>
-                          <a
-                            href={version.download_url.ios}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center space-x-1 px-2 py-1 rounded text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
-                          >
-                            <Download className="w-3 h-3" />
-                            <span>iOS</span>
-                          </a>
-                        </div>
+                        <a
+                          href={activeTab === 'android' ? version.download_url.android : version.download_url.ios}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                            activeTab === 'android' 
+                              ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' 
+                              : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
+                          }`}
+                        >
+                          <Download className="w-3 h-3" />
+                          <span>{getPlatformConfig(activeTab).label}</span>
+                        </a>
                       </td>
                       <td className="px-6 py-5">
                         <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200 bg-emerald-50 text-emerald-700 border-emerald-200/60 group-hover:bg-emerald-100/50">
@@ -469,7 +562,7 @@ export const VersionCheckManager: React.FC = () => {
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          {isLatestVersion(version) && (
+                          {/* {isLatestVersion(version) && ( */}
                             <>
                               <Button
                                 onClick={() => handleEdit(version)}
@@ -488,7 +581,7 @@ export const VersionCheckManager: React.FC = () => {
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </>
-                          )}
+                          {/* )} */}
                         </div>
                       </td>
                     </tr>
@@ -508,11 +601,26 @@ export const VersionCheckManager: React.FC = () => {
         size="2xl"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Form Instructions */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <div className="w-5 h-5 text-blue-600">ℹ️</div>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800">Required Fields</h3>
+                <div className="mt-2 text-sm text-blue-700">
+                  <p>Fields marked with <span className="text-red-500 font-semibold">*</span> are required. The download URL field will change based on your selected platform.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Version Information */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Latest Version
+                Latest Version <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -527,7 +635,7 @@ export const VersionCheckManager: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Minimum Required Version
+                Minimum Required Version <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -542,7 +650,26 @@ export const VersionCheckManager: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Update Priority
+                Platform Type <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.platform_type}
+                onChange={(e) => setFormData({ ...formData, platform_type: e.target.value as PlatformType })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                required
+                disabled={formLoading}
+              >
+                {platformOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.icon} {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Update Priority <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.update_priority}
@@ -560,43 +687,53 @@ export const VersionCheckManager: React.FC = () => {
             </div>
           </div>
 
-          {/* Download URLs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Android Download URL
-              </label>
-              <input
-                type="url"
-                value={formData.download_url.android}
-                onChange={(e) => setFormData({ ...formData, download_url: { ...formData.download_url, android: e.target.value } })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="https://play.google.com/store/apps/..."
-                required
-                disabled={formLoading}
-              />
-            </div>
+          {/* Download URL - Platform Specific */}
+          <div className="grid grid-cols-1 gap-6">
+            {formData.platform_type === 'android' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  🤖 Android Download URL <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="url"
+                  value={formData.download_url.android}
+                  onChange={(e) => setFormData({ ...formData, download_url: { ...formData.download_url, android: e.target.value } })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="https://play.google.com/store/apps/..."
+                  required
+                  disabled={formLoading}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter the Google Play Store URL for the Android app
+                </p>
+              </div>
+            )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                iOS Download URL
-              </label>
-              <input
-                type="url"
-                value={formData.download_url.ios}
-                onChange={(e) => setFormData({ ...formData, download_url: { ...formData.download_url, ios: e.target.value } })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="https://apps.apple.com/app/..."
-                required
-                disabled={formLoading}
-              />
-            </div>
+            {formData.platform_type === 'ios' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  🍎 iOS Download URL <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="url"
+                  value={formData.download_url.ios}
+                  onChange={(e) => setFormData({ ...formData, download_url: { ...formData.download_url, ios: e.target.value } })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="https://apps.apple.com/app/..."
+                  required
+                  disabled={formLoading}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter the App Store URL for the iOS app
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Release Date */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Release Date
+              Release Date <span className="text-red-500">*</span>
             </label>
             <input
               type="datetime-local"
@@ -611,7 +748,7 @@ export const VersionCheckManager: React.FC = () => {
           {/* Release Notes */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Release Notes
+              Release Notes <span className="text-red-500">*</span>
             </label>
             <textarea
               value={formData.release_notes}
@@ -627,7 +764,7 @@ export const VersionCheckManager: React.FC = () => {
           {/* New Features */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              New Features
+              New Features <span className="text-gray-400 text-xs">(Optional)</span>
             </label>
             <div className="space-y-3">
               <div className="flex space-x-2">
@@ -670,7 +807,7 @@ export const VersionCheckManager: React.FC = () => {
           {/* Bug Fixes */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Bug Fixes
+              Bug Fixes <span className="text-gray-400 text-xs">(Optional)</span>
             </label>
             <div className="space-y-3">
               <div className="flex space-x-2">
@@ -739,7 +876,7 @@ export const VersionCheckManager: React.FC = () => {
         {viewingVersion && (
           <div className="space-y-6">
             {/* Version Information */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h4 className="text-sm font-semibold text-gray-700 mb-2">Latest Version</h4>
                 <p className="text-lg font-bold text-gray-900">{viewingVersion.latest_version}</p>
@@ -747,6 +884,13 @@ export const VersionCheckManager: React.FC = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h4 className="text-sm font-semibold text-gray-700 mb-2">Minimum Required</h4>
                 <p className="text-lg font-bold text-gray-900">{viewingVersion.minimum_required_version}</p>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">Platform Type</h4>
+                <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium border bg-white text-gray-700 border-gray-200">
+                  <span className="mr-1">{getPlatformDisplayConfig(viewingVersion.platform_type).icon}</span>
+                  {getPlatformDisplayConfig(viewingVersion.platform_type).label}
+                </span>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h4 className="text-sm font-semibold text-gray-700 mb-2">Update Priority</h4>
@@ -777,24 +921,28 @@ export const VersionCheckManager: React.FC = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h4 className="text-sm font-semibold text-gray-700 mb-2">Download Links</h4>
                 <div className="flex flex-col space-y-2">
-                  <a
-                    href={viewingVersion.download_url.android}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-3 py-1 rounded-md text-xs bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
-                  >
-                    <Download className="w-3 h-3 mr-1" />
-                    Android
-                  </a>
-                  <a
-                    href={viewingVersion.download_url.ios}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-3 py-1 rounded-md text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
-                  >
-                    <Download className="w-3 h-3 mr-1" />
-                    iOS
-                  </a>
+                  {(viewingVersion.platform_type.toLowerCase() === 'android' || viewingVersion.platform_type.toLowerCase() === 'all') && (
+                    <a
+                      href={viewingVersion.download_url.android}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-3 py-1 rounded-md text-xs bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                    >
+                      <Download className="w-3 h-3 mr-1" />
+                      Android
+                    </a>
+                  )}
+                  {(viewingVersion.platform_type.toLowerCase() === 'ios' || viewingVersion.platform_type.toLowerCase() === 'all') && (
+                    <a
+                      href={viewingVersion.download_url.ios}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-3 py-1 rounded-md text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                    >
+                      <Download className="w-3 h-3 mr-1" />
+                      iOS
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

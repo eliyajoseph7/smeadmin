@@ -9,12 +9,16 @@ export interface DownloadUrls {
 // Update Priority Types (matching API response format)
 export type UpdatePriority = 'optional' | 'recommended' | 'critical';
 
+// Platform Types
+export type PlatformType = 'ios' | 'android';
+
 // App Version from API response
 export interface AppVersion {
   id: string;
   latest_version: string;
   minimum_required_version: string;
   update_priority: UpdatePriority;
+  platform_type: PlatformType;
   release_notes: string;
   release_date: string;
   download_url: DownloadUrls;
@@ -32,6 +36,7 @@ export interface CreateAppVersionRequest {
   latest_version: string;
   minimum_required_version: string;
   update_priority: UpdatePriority;
+  platform_type: PlatformType;
   release_notes: string;
   release_date: string;
   download_url: DownloadUrls;
@@ -43,6 +48,7 @@ export interface CreateAppVersionRequest {
 export interface UpdateAppVersionRequest {
   minimum_required_version?: string;
   update_priority?: UpdatePriority;
+  platform_type?: PlatformType;
   release_notes?: string;
   download_url?: DownloadUrls;
   new_features?: string[];
