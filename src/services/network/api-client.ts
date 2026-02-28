@@ -2,6 +2,7 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { JwtTokenGenerator } from '../auth/jwt-token-generator';
+import { API_CONFIG } from '../../config/api';
 
 export interface ApiResponse<T> {
   statusCode: number;
@@ -24,8 +25,7 @@ export type AppVersionProvider = () => Promise<string | null>;
 export class ApiClient {
   private static instance: ApiClient;
   private axiosInstance: AxiosInstance;
-  // public baseUrl = 'https://api-uat.rino.co.tz/api/v1';
-  public baseUrl = 'https://api.rino.co.tz/api/v1';
+  public baseUrl = import.meta.env.DEV ? '/api/v1' : API_CONFIG.BASE_URL_WITH_VERSION;
   private timeout = 20000; // 20 seconds
   // private authTokenProvider?: AuthTokenProvider;
   private deviceIdProvider?: DeviceIdProvider;
@@ -83,8 +83,7 @@ export class ApiClient {
         try {
           config.headers.Authorization = JwtTokenGenerator.getAuthorizationHeader();
           if (import.meta.env?.DEV) {
-            console.log('🔐 Using fresh JWT token for API request');
-          }
+                      }
         } catch (error) {
           if (import.meta.env?.DEV) {
             console.error('❌ Failed to generate JWT token:', error);
@@ -104,13 +103,6 @@ export class ApiClient {
           config.headers['X-App-Version'] = appVersion;
         }
 
-        console.log('🚀 HTTP Request:', {
-          url: config.url,
-          method: config.method?.toUpperCase(),
-          headers: config.headers,
-          data: config.data,
-        });
-
         return config;
       },
       (error) => {
@@ -122,12 +114,6 @@ export class ApiClient {
     // Response interceptor for handling responses
     this.axiosInstance.interceptors.response.use(
       (response) => {
-        console.log('🌐 HTTP Response:', {
-          url: response.config.url,
-          status: response.status,
-          data: response.data,
-        });
-
         // Check for API-level errors in response body
         if (response.data && typeof response.data === 'object') {
           const { response_code, response_status, message } = response.data;
@@ -233,10 +219,23 @@ export class ApiClient {
   }
 
   private transformResponse<T>(response: AxiosResponse<T>): ApiResponse<T> {
+    const responseData = response.data as any;
+    
+    // Handle the new API format with response_body wrapper
+    if (responseData && typeof responseData === 'object' && 'response_body' in responseData) {
+      return {
+        statusCode: response.status,
+        headers: response.headers as Record<string, string>,
+        data: responseData.response_body,
+        isSuccessful: response.status >= 200 && response.status < 300,
+      };
+    }
+    
+    // Handle direct response format (fallback)
     return {
       statusCode: response.status,
       headers: response.headers as Record<string, string>,
-      data: response.data,
+      data: responseData,
       isSuccessful: response.status >= 200 && response.status < 300,
     };
   }

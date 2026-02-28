@@ -4,7 +4,6 @@ import type {
   AppVersionCheckResponse,
   CreateAppVersionRequest,
   UpdateAppVersionRequest,
-  VersionHistoryResponse,
   DeleteVersionResponse
 } from '../../models/app-version';
 
@@ -64,8 +63,8 @@ export class AppVersionApiService {
    * Get version history with pagination
    * GET /api/v1/auth/version/history?page={page}&size={size}
    */
-  async getVersionHistory(page: number = 0, size: number = 10): Promise<VersionHistoryResponse> {
-    const response = await this.apiClient.get<VersionHistoryResponse>(
+  async getVersionHistory(page: number = 0, size: number = 10): Promise<AppVersion[]> {
+    const response = await this.apiClient.get<AppVersion[]>(
       `/auth/version/history?page=${page}&size=${size}`
     );
     return response.data;

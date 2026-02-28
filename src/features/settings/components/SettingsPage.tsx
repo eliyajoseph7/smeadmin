@@ -29,7 +29,7 @@ export const SettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>(() => {
     if (typeof window !== 'undefined') {
       const savedTab = localStorage.getItem(SETTINGS_ACTIVE_TAB_KEY) as SettingsTab;
-      return savedTab && ['units', 'categories', 'discounts', 'subscriptions', 'versions'].includes(savedTab) 
+      return savedTab && ['units', 'categories', 'discounts', 'subscriptions', 'versions', 'owners'].includes(savedTab) 
         ? savedTab 
         : 'units';
     }

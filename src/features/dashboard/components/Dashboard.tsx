@@ -1,14 +1,13 @@
 import React from "react";
 import { Card } from "../../../components/ui/Card";
 import { PageHeader } from "../../../components/layout/PageHeader";
+import { PlatformSummary } from "../../../components/dashboard/PlatformSummary";
 import {
   Users,
   ShoppingBag,
   DollarSign,
   BarChart3,
   LayoutDashboard,
-  TrendingUp,
-  Package,
 } from "lucide-react";
 
 const recentActivity = [
@@ -46,94 +45,12 @@ export const Dashboard: React.FC = () => {
         title="Dashboard"
         description="Welcome to your RINO Admin dashboard"
         icon={LayoutDashboard}
-      >
-        {/* Stats Cards - Matching smeweb Design */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Total Users Card */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-white to-slate-50 rounded-xl border border-slate-200/60 p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-200/50 group">
-            <div className="absolute -top-6 -right-6 w-24 h-24 bg-blue-50 rounded-full opacity-40 group-hover:opacity-60 transition-opacity duration-300"></div>
-            <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-blue-50 rounded-full opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+      />
 
-            <div className="relative flex items-center gap-4">
-              <div className="flex-shrink-0 w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center group-hover:shadow-md transition-shadow duration-200">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs uppercase tracking-wider font-medium text-slate-500 mb-1">
-                  Total Users
-                </p>
-                <p className="text-2xl font-bold text-slate-900">2,847</p>
-                <p className="text-xs text-emerald-600 font-medium">
-                  +12% from last month
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Total Products Card */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-white to-emerald-50 rounded-xl border border-slate-200/60 p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-200/50 group">
-            <div className="absolute -top-6 -right-6 w-24 h-24 bg-emerald-50 rounded-full opacity-40 group-hover:opacity-60 transition-opacity duration-300"></div>
-            <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-emerald-50 rounded-full opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-
-            <div className="relative flex items-center gap-4">
-              <div className="flex-shrink-0 w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center group-hover:shadow-md transition-shadow duration-200">
-                <Package className="w-6 h-6 text-emerald-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs uppercase tracking-wider font-medium text-slate-500 mb-1">
-                  Total Products
-                </p>
-                <p className="text-2xl font-bold text-slate-900">1,234</p>
-                <p className="text-xs text-emerald-600 font-medium">
-                  +8% from last month
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Revenue Card */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-white to-purple-50 rounded-xl border border-slate-200/60 p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-200/50 group">
-            <div className="absolute -top-6 -right-6 w-24 h-24 bg-purple-50 rounded-full opacity-40 group-hover:opacity-60 transition-opacity duration-300"></div>
-            <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-purple-50 rounded-full opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-
-            <div className="relative flex items-center gap-4">
-              <div className="flex-shrink-0 w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center group-hover:shadow-md transition-shadow duration-200">
-                <DollarSign className="w-6 h-6 text-purple-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs uppercase tracking-wider font-medium text-slate-500 mb-1">
-                  Revenue
-                </p>
-                <p className="text-2xl font-bold text-slate-900">$89,432</p>
-                <p className="text-xs text-emerald-600 font-medium">
-                  +23% from last month
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Orders Card */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-white to-amber-50 rounded-xl border border-slate-200/60 p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-200/50 group">
-            <div className="absolute -top-6 -right-6 w-24 h-24 bg-amber-50 rounded-full opacity-40 group-hover:opacity-60 transition-opacity duration-300"></div>
-            <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-amber-50 rounded-full opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-
-            <div className="relative flex items-center gap-4">
-              <div className="flex-shrink-0 w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center group-hover:shadow-md transition-shadow duration-200">
-                <TrendingUp className="w-6 h-6 text-amber-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs uppercase tracking-wider font-medium text-slate-500 mb-1">
-                  Orders
-                </p>
-                <p className="text-2xl font-bold text-slate-900">456</p>
-                <p className="text-xs text-red-600 font-medium">
-                  -2% from last month
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </PageHeader>
+      {/* Platform Summary */}
+      <div className="px-2 py-6">
+        <PlatformSummary />
+      </div>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-2 py-8">

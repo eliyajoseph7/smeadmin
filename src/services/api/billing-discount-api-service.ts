@@ -3,9 +3,6 @@ import type {
   BillingDiscount,
   CreateBillingDiscountRequest,
   UpdateBillingDiscountRequest,
-  BillingDiscountResponse,
-  BillingDiscountsListResponse,
-  DeleteBillingDiscountResponse
 } from '../../models/billing-discount.model';
 
 export class BillingDiscountApiService {
@@ -20,10 +17,10 @@ export class BillingDiscountApiService {
    * GET /api/v1/payment-service/billing-discounts
    */
   async getActiveDiscounts(): Promise<BillingDiscount[]> {
-    const response = await this.apiClient.get<BillingDiscountsListResponse>(
+    const response = await this.apiClient.get<BillingDiscount[]>(
       '/payment-service/billing-discounts'
     );
-    return response.data.response_body;
+    return response.data;
   }
 
   /**
@@ -31,10 +28,10 @@ export class BillingDiscountApiService {
    * GET /api/v1/payment-service/billing-discounts/all
    */
   async getAllDiscounts(): Promise<BillingDiscount[]> {
-    const response = await this.apiClient.get<BillingDiscountsListResponse>(
+    const response = await this.apiClient.get<BillingDiscount[]>(
       '/payment-service/billing-discounts/all'
     );
-    return response.data.response_body;
+    return response.data;
   }
 
   /**
@@ -42,11 +39,11 @@ export class BillingDiscountApiService {
    * POST /api/v1/payment-service/billing-discounts
    */
   async createOrUpdateDiscount(discountData: CreateBillingDiscountRequest): Promise<BillingDiscount> {
-    const response = await this.apiClient.post<BillingDiscountResponse>(
+    const response = await this.apiClient.post<BillingDiscount>(
       '/payment-service/billing-discounts',
       discountData
     );
-    return response.data.response_body!;
+    return response.data;
   }
 
   /**
@@ -54,11 +51,11 @@ export class BillingDiscountApiService {
    * PUT /api/v1/payment-service/billing-discounts/id/{discountId}
    */
   async updateDiscountById(discountId: string, updateData: UpdateBillingDiscountRequest): Promise<BillingDiscount> {
-    const response = await this.apiClient.put<BillingDiscountResponse>(
+    const response = await this.apiClient.put<BillingDiscount>(
       `/payment-service/billing-discounts/id/${discountId}`,
       updateData
     );
-    return response.data.response_body!;
+    return response.data;
   }
 
   /**
@@ -66,7 +63,7 @@ export class BillingDiscountApiService {
    * DELETE /api/v1/payment-service/billing-discounts/{discountId}
    */
   async deleteDiscount(discountId: string): Promise<void> {
-    await this.apiClient.delete<DeleteBillingDiscountResponse>(
+    await this.apiClient.delete<void>(
       `/payment-service/billing-discounts/${discountId}`
     );
   }

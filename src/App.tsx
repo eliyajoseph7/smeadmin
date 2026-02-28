@@ -8,6 +8,7 @@ import LoginPage from './features/auth/components/LoginPage'
 import { SettingsPage } from './features/settings/components/SettingsPage'
 import { CustomerSupportPage, StoreDetailsPageEnhanced } from './features/customer-support';
 import { AdminManagementPage } from './features/admin/components/AdminManagementPage';
+import { OwnersManager } from './features/users'
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -40,6 +41,16 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <AdminLayout>
               <Dashboard />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <OwnersManager />
             </AdminLayout>
           </ProtectedRoute>
         }

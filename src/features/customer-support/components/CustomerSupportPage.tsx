@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Phone, 
   Mail, 
@@ -24,15 +24,24 @@ import { toast } from 'react-hot-toast';
 
 export const CustomerSupportPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!phoneNumber.trim()) {
+  // Handle URL parameters on component mount
+  useEffect(() => {
+    const phoneFromUrl = searchParams.get('phone');
+    if (phoneFromUrl) {
+      setPhoneNumber(phoneFromUrl);
+      // Automatically trigger search
+      performSearch(phoneFromUrl);
+    }
+  }, [searchParams]);
+
+  const performSearch = async (phone: string) => {
+    if (!phone.trim()) {
       setError('Please enter a phone number');
       return;
     }
@@ -42,7 +51,7 @@ export const CustomerSupportPage: React.FC = () => {
     setCustomer(null);
 
     try {
-      const result = await customerService.searchByPhone(phoneNumber);
+      const result = await customerService.searchByPhone(phone);
       
       if (result) {
         setCustomer(result);
@@ -58,6 +67,11 @@ export const CustomerSupportPage: React.FC = () => {
     } finally {
       setIsSearching(false);
     }
+  };
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    performSearch(phoneNumber);
   };
 
   const handleStoreClick = (storeId: string) => {

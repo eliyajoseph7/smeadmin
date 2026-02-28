@@ -1,4 +1,4 @@
-import type { Customer, ApiResponse } from '../types/customer';
+import type { Customer } from '../types/customer';
 import type { 
   StoreUsersResponse, 
   ProductsResponse, 
@@ -17,12 +17,12 @@ class CustomerService {
   }
   async searchByPhone(phoneNumber: string): Promise<Customer | null> {
     try {
-      const response = await this.apiClient.get<ApiResponse<Customer>>(
+      const response = await this.apiClient.get<Customer>(
         `/auth/user-details/${encodeURIComponent(phoneNumber)}`
       );
       
-      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
-        return response.data.response_body;
+      if (response.isSuccessful && response.data) {
+        return response.data;
       }
       
       return null;
@@ -34,12 +34,12 @@ class CustomerService {
 
   async getStoreDetails(storeId: string): Promise<StoreUsersResponse | null> {
     try {
-      const response = await this.apiClient.get<ApiResponse<StoreUsersResponse>>(
+      const response = await this.apiClient.get<StoreUsersResponse>(
         `/auth/stores/${storeId}`
       );
       
-      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
-        return response.data.response_body;
+      if (response.isSuccessful && response.data) {
+        return response.data;
       }
       
       return null;
@@ -51,12 +51,12 @@ class CustomerService {
 
   async getStoreUsers(storeId: string): Promise<StoreUsersResponse | null> {
     try {
-      const response = await this.apiClient.get<ApiResponse<StoreUsersResponse>>(
+      const response = await this.apiClient.get<StoreUsersResponse>(
         `/auth/stores/${storeId}/users`
       );
       
-      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
-        return response.data.response_body;
+      if (response.isSuccessful && response.data) {
+        return response.data;
       }
       
       return null;
@@ -68,12 +68,12 @@ class CustomerService {
 
   async getStoreProducts(storeId: string, page: number = 0, size: number = 20): Promise<ProductsResponse | null> {
     try {
-      const response = await this.apiClient.get<ApiResponse<ProductsResponse>>(
+      const response = await this.apiClient.get<ProductsResponse>(
         `/product-service/products/store/${storeId}?page=${page}&size=${size}`
       );
       
-      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
-        return response.data.response_body;
+      if (response.isSuccessful && response.data) {
+        return response.data;
       }
       
       return null;
@@ -85,12 +85,12 @@ class CustomerService {
 
   async getStorePurchasePlans(storeId: string, page: number = 0, size: number = 20): Promise<PurchasePlansResponse | null> {
     try {
-      const response = await this.apiClient.get<ApiResponse<PurchasePlansResponse>>(
+      const response = await this.apiClient.get<PurchasePlansResponse>(
         `/purchase-service/purchase-plans?storeId=${storeId}&page=${page}&size=${size}`
       );
       
-      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
-        return response.data.response_body;
+      if (response.isSuccessful && response.data) {
+        return response.data;
       }
       
       return null;
@@ -102,12 +102,12 @@ class CustomerService {
 
   async getStoreSales(storeId: string, saleType: 'QUOTATION' | 'DIRECT' = 'DIRECT', page: number = 0, size: number = 20): Promise<SalesResponse | null> {
     try {
-      const response = await this.apiClient.get<ApiResponse<SalesResponse>>(
+      const response = await this.apiClient.get<SalesResponse>(
         `/sale-service/sales/store/${storeId}?saleType=${saleType}&page=${page}&size=${size}`
       );
       
-      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
-        return response.data.response_body;
+      if (response.isSuccessful && response.data) {
+        return response.data;
       }
       
       return null;
@@ -119,12 +119,12 @@ class CustomerService {
 
   async getStoreExpenses(storeId: string): Promise<ExpensesResponse | null> {
     try {
-      const response = await this.apiClient.get<ApiResponse<ExpensesResponse>>(
+      const response = await this.apiClient.get<ExpensesResponse>(
         `/purchase-service/expenses?storeId=${storeId}`
       );
       
-      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
-        return response.data.response_body;
+      if (response.isSuccessful && response.data) {
+        return response.data;
       }
       
       return null;
@@ -140,7 +140,7 @@ class CustomerService {
         `/payment-service/payments/user/${userId}/all`
       );
       
-      if (response.isSuccessful && response.data?.response_code === 200 && response.data.response_body) {
+      if (response.isSuccessful && response.data) {
         return response.data;
       }
       

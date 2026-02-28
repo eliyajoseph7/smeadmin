@@ -15,7 +15,6 @@ import type {
   VersionCheckResponse, 
   CreateVersionCheckRequest 
 } from '../../../models/version.model';
-import type { ApiResponse } from '../../../models/common.model';
 
 class ProductApiService {
   private apiClient: ApiClient;
@@ -30,16 +29,16 @@ class ProductApiService {
    * Create Unit of Measure
    */
   async createUnitOfMeasure(data: Omit<UnitOfMeasure, 'id' | 'isActive' | 'createdAt' | 'updatedAt'>): Promise<UnitOfMeasure> {
-    const response = await this.apiClient.post<ApiResponse<UnitOfMeasure>>(
+    const response = await this.apiClient.post<UnitOfMeasure>(
       '/product-service/units-of-measure',
       data
     );
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to create unit of measure');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to create unit of measure');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   /**
@@ -50,13 +49,13 @@ class ProductApiService {
       ? `/product-service/units-of-measure/search?name=${encodeURIComponent(name)}`
       : '/product-service/units-of-measure/search';
     
-    const response = await this.apiClient.get<ApiResponse<UnitOfMeasure[]>>(url);
+    const response = await this.apiClient.get<UnitOfMeasure[]>(url);
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to search units of measure');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to search units of measure');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   /**
@@ -70,16 +69,16 @@ class ProductApiService {
    * Update Unit of Measure
    */
   async updateUnitOfMeasure(id: string, data: Partial<Omit<UnitOfMeasure, 'id' | 'createdAt' | 'updatedAt'>>): Promise<UnitOfMeasure> {
-    const response = await this.apiClient.put<ApiResponse<UnitOfMeasure>>(
+    const response = await this.apiClient.put<UnitOfMeasure>(
       `/product-service/units-of-measure/${id}`,
       data
     );
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to update unit of measure');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to update unit of measure');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   // ==================== CATEGORY ENDPOINTS ====================
@@ -88,47 +87,47 @@ class ProductApiService {
    * Create Category
    */
   async createCategory(data: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>): Promise<Category> {
-    const response = await this.apiClient.post<ApiResponse<Category>>(
+    const response = await this.apiClient.post<Category>(
       '/product-service/categories',
       data
     );
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to create category');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to create category');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   /**
    * Get all categories
    */
   async getAllCategories(): Promise<Category[]> {
-    const response = await this.apiClient.get<ApiResponse<Category[]>>(
+    const response = await this.apiClient.get<Category[]>(
       '/product-service/categories'
     );
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to get categories');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to get categories');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   /**
    * Update Category
    */
   async updateCategory(id: string, data: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Category> {
-    const response = await this.apiClient.put<ApiResponse<Category>>(
+    const response = await this.apiClient.put<Category>(
       `/product-service/categories/${id}`,
       data
     );
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to update category');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to update category');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   // ==================== PAYMENT & SUBSCRIPTION ENDPOINTS ====================
@@ -137,62 +136,62 @@ class ProductApiService {
    * Get Available Discount Options
    */
   async getDiscountOptions(): Promise<DiscountOption[]> {
-    const response = await this.apiClient.get<ApiResponse<DiscountOption[]>>(
+    const response = await this.apiClient.get<DiscountOption[]>(
       '/payment-service/billing-discounts'
     );
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to get discount options');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to get discount options');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   /**
    * Create Discount Option
    */
   async createDiscountOption(data: CreateDiscountOptionRequest): Promise<DiscountOption> {
-    const response = await this.apiClient.post<ApiResponse<DiscountOption>>(
+    const response = await this.apiClient.post<DiscountOption>(
       '/payment-service/billing-discounts',
       data
     );
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to create discount option');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to create discount option');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   /**
    * Get Available Subscription Plans
    */
   async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
-    const response = await this.apiClient.get<ApiResponse<SubscriptionPlan[]>>(
+    const response = await this.apiClient.get<SubscriptionPlan[]>(
       '/payment-service/subscription-plans/available'
     );
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to get subscription plans');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to get subscription plans');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   /**
    * Create Subscription Plan
    */
   async createSubscriptionPlan(data: CreateSubscriptionPlanRequest): Promise<SubscriptionPlan> {
-    const response = await this.apiClient.post<ApiResponse<SubscriptionPlan>>(
+    const response = await this.apiClient.post<SubscriptionPlan>(
       '/payment-service/subscription-plans',
       data
     );
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to create subscription plan');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to create subscription plan');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   // ==================== VERSION CHECK ENDPOINTS ====================
@@ -218,15 +217,15 @@ class ProductApiService {
    */
   async getAllVersionChecks(): Promise<VersionCheck[]> {
     // TODO: Replace with actual admin endpoint when available
-    const response = await this.apiClient.get<ApiResponse<VersionCheck[]>>(
+    const response = await this.apiClient.get<VersionCheck[]>(
       '/admin/version-checks'
     );
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to get version checks');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to get version checks');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   /**
@@ -235,16 +234,16 @@ class ProductApiService {
    */
   async createVersionCheck(data: CreateVersionCheckRequest): Promise<VersionCheck> {
     // TODO: Replace with actual admin endpoint when available
-    const response = await this.apiClient.post<ApiResponse<VersionCheck>>(
+    const response = await this.apiClient.post<VersionCheck>(
       '/admin/version-checks',
       data
     );
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to create version check');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to create version check');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   /**
@@ -253,16 +252,16 @@ class ProductApiService {
    */
   async updateVersionCheck(id: string, data: Partial<CreateVersionCheckRequest>): Promise<VersionCheck> {
     // TODO: Replace with actual admin endpoint when available
-    const response = await this.apiClient.put<ApiResponse<VersionCheck>>(
+    const response = await this.apiClient.put<VersionCheck>(
       `/admin/version-checks/${id}`,
       data
     );
     
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to update version check');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to update version check');
     }
     
-    return response.data.response_body;
+    return response.data;
   }
 
   /**
@@ -271,12 +270,12 @@ class ProductApiService {
    */
   async deleteVersionCheck(id: string): Promise<void> {
     // TODO: Replace with actual admin endpoint when available
-    const response = await this.apiClient.delete<ApiResponse<void>>(
+    const response = await this.apiClient.delete<void>(
       `/admin/version-checks/${id}`
     );
     
     if (!response.isSuccessful) {
-      throw new Error(response.data?.message || 'Failed to delete version check');
+      throw new Error('Failed to delete version check');
     }
   }
 }

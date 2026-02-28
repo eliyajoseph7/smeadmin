@@ -4,7 +4,6 @@ import type {
   CreateSubscriptionPlanRequest,
   UpdateSubscriptionPlanRequest,
   SubscriptionPlanResponse,
-  SubscriptionPlansListResponse,
   PlanStatus
 } from '../../models/subscription.model';
 
@@ -47,8 +46,8 @@ export class SubscriptionPlanApiService {
     const queryString = params.toString();
     const url = `/payment-service/subscription-plans${queryString ? `?${queryString}` : ''}`;
     
-    const response = await this.apiClient.get<SubscriptionPlansListResponse>(url);
-    return response.data.response_body.content;
+    const response = await this.apiClient.get<{content: SubscriptionPlan[]}>(url);
+    return response.data.content;
   }
 
   /**

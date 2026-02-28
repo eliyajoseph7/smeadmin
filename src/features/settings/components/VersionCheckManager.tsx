@@ -98,7 +98,7 @@ export const VersionCheckManager: React.FC = () => {
 
       // Load version history and filter by platform
       const history = await versionService.getVersionHistory(0, 20);
-      const platformVersions = history.response_body.filter(version => {
+      const platformVersions = history.filter(version => {
         const platformType = version.platform_type.toLowerCase();
         return platformType === activeTab || platformType === 'all';
       });
