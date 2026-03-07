@@ -25,7 +25,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   children,
   className
 }) => {
-  const { user, logout } = useAuth();
+  const { admin, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
 
   const handleLogout = () => {
@@ -70,8 +70,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
                   <User className="w-4 h-4 text-white" />
                 </div>
                 <div className="text-left hidden sm:block">
-                  <p className="text-sm font-medium text-neutral-900">Admin User</p>
-                  <p className="text-xs text-neutral-600">{user?.emailOrPhone || 'admin@sme.com'}</p>
+                  <p className="text-sm font-medium text-neutral-900">{admin?.fullName || 'Admin User'}</p>
+                  <p className="text-xs text-neutral-600">{admin?.email || 'admin@rino.co.tz'}</p>
                 </div>
                 <ChevronDown className="w-4 h-4 text-neutral-400" />
               </button>
@@ -85,8 +85,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
                         <User className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="font-medium text-neutral-900">Admin User</p>
-                        <p className="text-sm text-neutral-600">{user?.emailOrPhone || 'admin@sme.com'}</p>
+                        <p className="font-medium text-neutral-900">{admin?.fullName || 'Admin User'}</p>
+                        <p className="text-sm text-neutral-600">{admin?.email || 'admin@rino.co.tz'}</p>
                       </div>
                     </div>
                   </div>

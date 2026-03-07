@@ -11,50 +11,29 @@ import {
 } from '@heroicons/react/24/outline';
 
 const LoginPage: React.FC = () => {
-  const [emailOrPhone, setEmailOrPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [emailOrPhoneError, setEmailOrPhoneError] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isLoading } = useAuth();
 
-  const validateEmailOrPhone = () => {
-    if (!emailOrPhone.trim()) {
-      setEmailOrPhoneError('Email or phone number is required');
+  const validateEmail = () => {
+    if (!email.trim()) {
+      setEmailError('Email is required');
       return false;
     }
 
-    // Check if it's an email or phone
-    const isEmail = emailOrPhone.includes('@');
-    const isPhone = /^[+]?[0-9\s\-()]+$/.test(emailOrPhone);
-
-    if (!isEmail && !isPhone) {
-      setEmailOrPhoneError('Please enter a valid email or phone number');
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError('Please enter a valid email address');
       return false;
     }
 
-    if (isEmail) {
-      // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailOrPhone)) {
-        setEmailOrPhoneError('Please enter a valid email address');
-        return false;
-      }
-    }
-
-    if (isPhone) {
-      // Basic phone validation (allow various formats)
-      const cleanPhone = emailOrPhone.replace(/[\s\-()]/g, '');
-      if (cleanPhone.length < 9 || cleanPhone.length > 15) {
-        setEmailOrPhoneError('Please enter a valid phone number');
-        return false;
-      }
-    }
-
-    setEmailOrPhoneError('');
+    setEmailError('');
     return true;
   };
 
@@ -76,38 +55,29 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const isEmailOrPhoneValid = validateEmailOrPhone();
+    const isEmailValid = validateEmail();
     const isPasswordValid = validatePassword();
 
-    if (!isEmailOrPhoneValid || !isPasswordValid) {
+    if (!isEmailValid || !isPasswordValid) {
       toast.error('Please fix the errors in the form');
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      // Simulate login API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // For demo purposes, accept any valid credentials
-      toast.success('Login successful! Welcome to RINO Admin 🎉');
+      // Call real authentication API
+      await login({ email, password });
       
       // Store login state if remember me is checked
       if (rememberMe) {
         localStorage.setItem('smeadmin_remember', 'true');
-        localStorage.setItem('smeadmin_user', emailOrPhone);
+        localStorage.setItem('smeadmin_user', email);
       }
-      
-      // Update authentication state
-      login({ emailOrPhone });
       
       // Navigate to admin dashboard
       navigate('/dashboard');
     } catch (error: any) {
-      toast.error(error instanceof Error ? error.message : 'Login failed');
-    } finally {
-      setIsLoading(false);
+      // Error handling is done in AuthContext
+      console.error('Login error:', error);
     }
   };
 
@@ -206,41 +176,41 @@ const LoginPage: React.FC = () => {
 
                 {/* Admin Login Form */}
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Email/Phone Input */}
+                  {/* Email Input */}
                   <div className="space-y-2">
-                    <label htmlFor="emailOrPhone" className="block text-sm font-semibold text-gray-700">
-                      Email or Phone Number
+                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
+                      Email Address
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <EnvelopeIcon className="h-5 w-5 text-gray-400" />
                       </div>
                       <input
-                        id="emailOrPhone"
-                        type="text"
-                        value={emailOrPhone}
+                        id="email"
+                        type="email"
+                        value={email}
                         onChange={(e) => {
-                          setEmailOrPhone(e.target.value);
-                          if (emailOrPhoneError) setEmailOrPhoneError('');
+                          setEmail(e.target.value);
+                          if (emailError) setEmailError('');
                         }}
-                        onBlur={validateEmailOrPhone}
-                        placeholder="admin@example.com or +255123456789"
+                        onBlur={validateEmail}
+                        placeholder="admin@example.com"
                         className={`input-modern pl-10 text-lg ${
-                          emailOrPhoneError ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''
+                          emailError ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''
                         }`}
                         disabled={isLoading}
                       />
                     </div>
-                    {emailOrPhoneError ? (
+                    {emailError ? (
                       <p className="text-sm text-red-600 flex items-center gap-1">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
-                        {emailOrPhoneError}
+                        {emailError}
                       </p>
                     ) : (
                       <p className="text-xs text-gray-500">
-                        Enter your email address or phone number
+                        Enter your admin email address
                       </p>
                     )}
                   </div>

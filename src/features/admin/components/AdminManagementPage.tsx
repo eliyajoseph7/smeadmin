@@ -3,6 +3,7 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Modal } from '../../../components/ui/Modal';
 import { PageHeader } from '../../../components/layout/PageHeader';
+import DeleteConfirmationModal from '../../../components/ui/DeleteConfirmationModal';
 import { 
   Plus,
   Search,
@@ -44,6 +45,9 @@ export const AdminManagementPage: React.FC = () => {
     phoneNumber: '',
     role: ''
   });
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [adminToDelete, setAdminToDelete] = useState<Admin | null>(null);
 
   // Load admins on component mount
   useEffect(() => {
@@ -121,12 +125,19 @@ export const AdminManagementPage: React.FC = () => {
   };
 
   const handleDeleteAdmin = async (admin: Admin) => {
-    if (!confirm(`Are you sure you want to delete ${admin.fullName}?`)) return;
+    setAdminToDelete(admin);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDeleteAdmin = async () => {
+    if (!adminToDelete) return;
 
     try {
-      await adminManagementService.deleteAdmin(admin.id);
+      await adminManagementService.deleteAdmin(adminToDelete.id);
       toast.success('Admin deleted successfully');
       loadAdmins();
+      setDeleteModalOpen(false);
+      setAdminToDelete(null);
     } catch (error: any) {
       toast.error(error.message || 'Failed to delete admin');
       console.error('Error deleting admin:', error);
@@ -201,7 +212,8 @@ export const AdminManagementPage: React.FC = () => {
       />
 
       {/* Filters and Search */}
-      <Card className="p-6">
+      <div className="px-2 py-6">
+        <Card className="p-6">
         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
           <div className="flex flex-col sm:flex-row gap-4 flex-1">
             <div className="relative flex-1 max-w-md">
@@ -246,10 +258,12 @@ export const AdminManagementPage: React.FC = () => {
             <span>Add Admin</span>
           </Button>
         </div>
-      </Card>
+        </Card>
+      </div>
 
       {/* Admins Table */}
-      <Card>
+      <div className="px-2 py-8">
+        <Card>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
@@ -372,7 +386,8 @@ export const AdminManagementPage: React.FC = () => {
             </tbody>
           </table>
         </div>
-      </Card>
+        </Card>
+      </div>
 
       {/* Create Admin Modal */}
       <Modal
@@ -607,6 +622,21 @@ export const AdminManagementPage: React.FC = () => {
           </div>
         )}
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setAdminToDelete(null);
+        }}
+        onConfirm={confirmDeleteAdmin}
+        title="Delete Admin"
+        message={`Are you sure you want to delete ${adminToDelete?.fullName}? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 };

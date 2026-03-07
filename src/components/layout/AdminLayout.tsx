@@ -82,7 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { admin, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
@@ -212,17 +212,17 @@ const Sidebar: React.FC<SidebarProps> = ({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-neutral-900 truncate">
-                  Admin User
+                  {admin?.fullName || 'Admin User'}
                 </p>
                 <p className="text-xs text-neutral-600 truncate">
-                  {user?.emailOrPhone || 'admin@sme.com'}
+                  {admin?.email || 'admin@rino.co.tz'}
                 </p>
               </div>
             </div>
             <Button
               variant="ghost"
               onClick={handleLogout}
-              className="w-full justify-start text-sm text-neutral-600 hover:text-red-600"
+              className="w-full flex justify-start text-sm text-neutral-600 hover:text-red-600"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out

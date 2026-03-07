@@ -53,7 +53,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-2 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-2 py-8 hidden">
         {/* Left Column - Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Revenue Analytics */}

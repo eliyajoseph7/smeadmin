@@ -5,7 +5,6 @@ import type {
   UpdateAdminRequest,
   UpdateAdminStatusRequest,
   ChangePasswordRequest,
-  ApiResponse,
   SimpleResponse,
   AdminRole,
   AdminStatus
@@ -32,60 +31,85 @@ class AdminManagementService {
     const queryString = params.toString();
     const endpoint = queryString ? `/admin/admins?${queryString}` : '/admin/admins';
 
-    const response = await this.apiClient.get<ApiResponse<Admin[]>>(endpoint);
+    const response = await this.apiClient.get<any>(endpoint);
 
-    if (!response.isSuccessful || !response.data?.response_body) {
+    if (!response.isSuccessful || !response.data) {
       throw new Error('Failed to fetch admins');
     }
 
-    return response.data.response_body;
+    // Handle both wrapped and unwrapped responses
+    const apiData = response.data.response_body || response.data;
+    
+    if (!apiData) {
+      throw new Error('Invalid API response structure');
+    }
+
+    return apiData;
   }
 
   /**
    * Get Admin by ID
    */
   async getAdminById(id: string): Promise<Admin> {
-    const response = await this.apiClient.get<ApiResponse<Admin>>(
+    const response = await this.apiClient.get<any>(
       `/admin/admins/${id}`
     );
 
-    if (!response.isSuccessful || !response.data?.response_body) {
+    if (!response.isSuccessful || !response.data) {
       throw new Error('Failed to fetch admin details');
     }
 
-    return response.data.response_body;
+    const apiData = response.data.response_body || response.data;
+    
+    if (!apiData) {
+      throw new Error('Invalid API response structure');
+    }
+
+    return apiData;
   }
 
   /**
    * Create Admin User
    */
   async createAdmin(data: CreateAdminRequest): Promise<Admin> {
-    const response = await this.apiClient.post<ApiResponse<Admin>>(
+    const response = await this.apiClient.post<any>(
       '/admin/admins',
       data
     );
 
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to create admin');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to create admin');
     }
 
-    return response.data.response_body;
+    const apiData = response.data.response_body || response.data;
+    
+    if (!apiData) {
+      throw new Error('Invalid API response structure');
+    }
+
+    return apiData;
   }
 
   /**
    * Update Admin User
    */
   async updateAdmin(id: string, data: UpdateAdminRequest): Promise<Admin> {
-    const response = await this.apiClient.put<ApiResponse<Admin>>(
+    const response = await this.apiClient.put<any>(
       `/admin/admins/${id}`,
       data
     );
 
-    if (!response.isSuccessful || !response.data?.response_body) {
-      throw new Error(response.data?.message || 'Failed to update admin');
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to update admin');
     }
 
-    return response.data.response_body;
+    const apiData = response.data.response_body || response.data;
+    
+    if (!apiData) {
+      throw new Error('Invalid API response structure');
+    }
+
+    return apiData;
   }
 
   /**
