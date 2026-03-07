@@ -15,7 +15,8 @@ import {
   LogOut,
   Store,
   MessageSquare,
-  Shield
+  Shield,
+  CreditCard
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -38,6 +39,7 @@ const navigation: NavigationItem[] = [
   // { name: 'Products', href: '/products', icon: ShoppingBag },
   // { name: 'Orders', href: '/orders', icon: FileText },
   // { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Subscriptions', href: '/subscriptions', icon: CreditCard },
   { name: 'Customer Support', href: '/customer-support', icon: MessageSquare },
   { name: 'Admin Management', href: '/admin-management', icon: Shield },
   { name: 'Settings', href: '/settings', icon: Settings },

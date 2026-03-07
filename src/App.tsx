@@ -9,6 +9,7 @@ import { SettingsPage } from './features/settings/components/SettingsPage'
 import { CustomerSupportPage, StoreDetailsPageEnhanced } from './features/customer-support';
 import { AdminManagementPage } from './features/admin/components/AdminManagementPage';
 import { OwnersManager } from './features/users'
+import { SubscriptionManagementPage } from './features/subscriptions/components/SubscriptionManagementPage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -91,6 +92,16 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <AdminLayout>
               <AdminManagementPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/subscriptions"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <SubscriptionManagementPage />
             </AdminLayout>
           </ProtectedRoute>
         }

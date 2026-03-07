@@ -2,6 +2,7 @@ import React from "react";
 import { Card } from "../../../components/ui/Card";
 import { PageHeader } from "../../../components/layout/PageHeader";
 import { PlatformSummary } from "../../../components/dashboard/PlatformSummary";
+import { RecentSubscriptions } from "../../../components/dashboard/RecentSubscriptions";
 import {
   Users,
   ShoppingBag,
@@ -106,6 +107,9 @@ export const Dashboard: React.FC = () => {
 
         {/* Right Column - Sidebar Content */}
         <div className="space-y-6">
+          {/* Recent Subscriptions */}
+          <RecentSubscriptions />
+
           {/* Recent Activity */}
           <Card className="dashboard-card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
