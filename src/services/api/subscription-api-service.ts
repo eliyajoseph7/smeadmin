@@ -1,5 +1,12 @@
 import { ApiClient } from '../network/api-client';
-import type { Subscription, SubscriptionListResponse, SubscriptionFilters } from '../../types/subscription';
+import type { 
+  Subscription, 
+  SubscriptionListResponse, 
+  SubscriptionFilters,
+  SubscriptionPlan,
+  ActivateSubscriptionRequest,
+  ActivateSubscriptionResponse
+} from '../../types/subscription';
 
 class SubscriptionApiService {
   private apiClient: ApiClient;
@@ -56,6 +63,56 @@ class SubscriptionApiService {
     }
 
     return apiData;
+  }
+
+  /**
+   * Get all subscription plans
+   */
+  async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+    const response = await this.apiClient.get<any>(
+      '/payment-service/subscription-plans'
+    );
+
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to fetch subscription plans');
+    }
+
+    const apiData = response.data.response_body || response.data;
+    
+    if (!apiData) {
+      throw new Error('Invalid API response structure');
+    }
+
+    // Handle paginated response - plans are in content array
+    if (apiData.content && Array.isArray(apiData.content)) {
+      return apiData.content;
+    }
+
+    // Handle direct array response
+    return Array.isArray(apiData) ? apiData : [];
+  }
+
+  /**
+   * Admin endpoint to manually activate a subscription
+   * POST /payment-service/subscriptions/admin/activate
+   */
+  async activateSubscription(request: ActivateSubscriptionRequest): Promise<ActivateSubscriptionResponse> {
+    const response = await this.apiClient.post<any>(
+      '/payment-service/subscriptions/admin/activate',
+      request
+    );
+
+    if (!response.isSuccessful || !response.data) {
+      throw new Error('Failed to activate subscription');
+    }
+
+    // Return the full response which includes message, response_code, response_status, and response_body
+    return {
+      response_code: response.data.response_code,
+      response_status: response.data.response_status,
+      message: response.data.message,
+      response_body: response.data.response_body
+    };
   }
 }
 

@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import {
-  Phone,
-  Mail,
-  Calendar,
-  ShoppingBag,
-  CheckCircle,
-  XCircle,
-  Clock,
-  MapPin,
-  User,
+import { 
+  Phone, 
+  Mail, 
+  Calendar, 
+  ShoppingBag, 
+  CheckCircle, 
+  XCircle, 
+  Clock, 
+  MapPin, 
+  User, 
   Award,
   Search,
   Loader2,
   MessageSquare,
   Key,
+  CreditCard
 } from "lucide-react";
 import { Card } from "../../../components/ui/Card";
 import { Button } from "../../../components/ui/Button";
@@ -23,6 +24,7 @@ import { customerService } from "../services/customer.service";
 import type { Customer } from "../types/customer";
 import { toast } from "react-hot-toast";
 import { GenerateOTPModal } from "./GenerateOTPModal";
+import { ActivateSubscriptionModal } from './ActivateSubscriptionModal';
 
 export const CustomerSupportPage: React.FC = () => {
   const navigate = useNavigate();
@@ -32,6 +34,7 @@ export const CustomerSupportPage: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOTPModal, setShowOTPModal] = useState(false);
+  const [showActivateModal, setShowActivateModal] = useState(false);
 
   // Handle URL parameters on component mount
   useEffect(() => {
@@ -242,14 +245,23 @@ export const CustomerSupportPage: React.FC = () => {
                       </div>
                     </div>
                     <div>
-                      <Button
-                        onClick={() => setShowOTPModal(true)}
-                        className="flex items-center space-x-2"
-                        variant="secondary"
-                      >
-                        <Key className="w-4 h-4" />
-                        <span>Generate OTP</span>
-                      </Button>
+                      <div className="flex space-x-2">
+                        <Button
+                          onClick={() => setShowOTPModal(true)}
+                          className="flex items-center space-x-2"
+                          variant="secondary"
+                        >
+                          <Key className="w-4 h-4" />
+                          <span>Generate OTP</span>
+                        </Button>
+                        <Button
+                          onClick={() => setShowActivateModal(true)}
+                          className="flex items-center space-x-2"
+                        >
+                          <CreditCard className="w-4 h-4" />
+                          <span>Activate Subscription</span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
@@ -463,6 +475,19 @@ export const CustomerSupportPage: React.FC = () => {
         onClose={() => setShowOTPModal(false)}
         defaultPhoneNumber={customer?.phone_number || phoneNumber}
       />
+
+      {/* Activate Subscription Modal */}
+      {customer && (
+        <ActivateSubscriptionModal
+          isOpen={showActivateModal}
+          onClose={() => setShowActivateModal(false)}
+          customerId={customer.user_id}
+          customerName={customer.business_name}
+          onSuccess={() => {
+            // Optionally refresh customer data here if needed
+          }}
+        />
+      )}
     </>
   );
 };
