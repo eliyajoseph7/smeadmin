@@ -9,10 +9,15 @@ export interface Subscription {
 
 export interface Sales {
   totalSalesCount: number;
-  totalPaymentsCollected: number;
-  totalRevenue: number;
-  totalProfit: number;
-  currency: string;
+  totalPaymentsCollected?: number;
+  totalRevenue?: number;
+  totalProfit?: number;
+  currency?: string;
+}
+
+export interface ProductStats {
+  totalProducts: number;
+  activeProducts: number;
 }
 
 export interface Owner {
@@ -24,9 +29,9 @@ export interface Owner {
   webActivated: boolean;
   totalStores: number;
   activeStores: number;
-  subscription: Subscription;
+  subscription: Subscription | null;
   totalStaff: number;
-  totalProducts: number;
+  productStats: ProductStats;
   sales: Sales;
 }
 

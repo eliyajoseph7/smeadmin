@@ -92,7 +92,8 @@ export const OwnersManager: React.FC = () => {
     navigate(`/customer-support?phone=${encodeURIComponent(owner.phoneNumber)}`);
   };
 
-  const formatCurrency = (amount: number, currency: string) => {
+  const formatCurrency = (amount: number | undefined, currency: string) => {
+    if (amount === undefined || amount === null) return 'N/A';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency === 'USD' ? 'USD' : 'TZS',
@@ -251,7 +252,7 @@ export const OwnersManager: React.FC = () => {
                           </div>
                           <div className="flex items-center text-xs text-slate-500">
                             <Package className="w-3 h-3 mr-1" />
-                            {owner.totalProducts} Products
+                            {owner.productStats.activeProducts} (active)/{owner.productStats.totalProducts} Products
                           </div>
                         </div>
                       </td>
@@ -273,11 +274,11 @@ export const OwnersManager: React.FC = () => {
                         <div className="space-y-1">
                           <div className="flex items-center text-sm text-slate-900 hidden">
                             {/* <DollarSign className="w-4 h-4 mr-1 text-green-500" /> */}
-                            {formatCurrency(owner.sales.totalRevenue, 'TZS')}
+                            {owner.sales.totalRevenue ? formatCurrency(owner.sales.totalRevenue, 'TZS') : 'N/A'}
                           </div>
                           <div className="text-xs text-slate-600">
                             <div>{owner.sales.totalSalesCount} sales</div>
-                            <div className="hidden">Profit: {formatCurrency(owner.sales.totalProfit, 'TZS')}</div>
+                            <div className="hidden">Profit: {owner.sales.totalProfit ? formatCurrency(owner.sales.totalProfit, 'TZS') : 'N/A'}</div>
                           </div>
                         </div>
                       </td>
@@ -407,7 +408,11 @@ export const OwnersManager: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-xs text-gray-500">Total Products</span>
-                    <span className="text-sm font-medium text-gray-900">{selectedOwner.totalProducts}</span>
+                    <span className="text-sm font-medium text-gray-900">{selectedOwner.productStats.totalProducts}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs text-gray-500">Active Products</span>
+                    <span className="text-sm font-medium text-green-600">{selectedOwner.productStats.activeProducts}</span>
                   </div>
                 </div>
               </div>
@@ -416,40 +421,46 @@ export const OwnersManager: React.FC = () => {
             {/* Subscription Details */}
             <div className="bg-gray-50 p-4 rounded-lg">
               <h4 className="text-sm font-semibold text-gray-700 mb-2">Subscription Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-xs text-gray-500">Status</p>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium border ${getSubscriptionStatusColor(selectedOwner.subscription.status)}`}>
-                    {selectedOwner.subscription.status}
-                  </span>
+              {selectedOwner.subscription ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500">Status</p>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium border ${getSubscriptionStatusColor(selectedOwner.subscription.status)}`}>
+                      {selectedOwner.subscription.status}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Plan</p>
+                    <p className="text-sm font-medium text-gray-900">{selectedOwner.subscription.planName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Auto Renew</p>
+                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                      selectedOwner.subscription.autoRenew 
+                        ? 'bg-green-50 text-green-700' 
+                        : 'bg-gray-50 text-gray-700'
+                    }`}>
+                      {selectedOwner.subscription.autoRenew ? 'Enabled' : 'Disabled'}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Start Date</p>
+                    <p className="text-sm font-medium text-gray-900">{formatDate(selectedOwner.subscription.startDate)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">End Date</p>
+                    <p className="text-sm font-medium text-gray-900">{formatDate(selectedOwner.subscription.endDate)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Renewal Count</p>
+                    <p className="text-sm font-medium text-gray-900">{selectedOwner.subscription.renewalCount}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500">Plan</p>
-                  <p className="text-sm font-medium text-gray-900">{selectedOwner.subscription.planName}</p>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-sm text-gray-500">No active subscription</p>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500">Auto Renew</p>
-                  <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                    selectedOwner.subscription.autoRenew 
-                      ? 'bg-green-50 text-green-700' 
-                      : 'bg-gray-50 text-gray-700'
-                  }`}>
-                    {selectedOwner.subscription.autoRenew ? 'Enabled' : 'Disabled'}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Start Date</p>
-                  <p className="text-sm font-medium text-gray-900">{formatDate(selectedOwner.subscription.startDate)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">End Date</p>
-                  <p className="text-sm font-medium text-gray-900">{formatDate(selectedOwner.subscription.endDate)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Renewal Count</p>
-                  <p className="text-sm font-medium text-gray-900">{selectedOwner.subscription.renewalCount}</p>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Sales Performance */}

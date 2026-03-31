@@ -16,7 +16,8 @@ import {
   Store,
   MessageSquare,
   Shield,
-  CreditCard
+  CreditCard,
+  Activity
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -35,6 +36,7 @@ interface NavigationItem {
 
 const navigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Activity Tracking', href: '/activity', icon: Activity },
   { name: 'Users', href: '/users', icon: Users },
   // { name: 'Products', href: '/products', icon: ShoppingBag },
   // { name: 'Orders', href: '/orders', icon: FileText },

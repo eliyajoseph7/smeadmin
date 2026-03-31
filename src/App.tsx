@@ -10,6 +10,9 @@ import { CustomerSupportPage, StoreDetailsPageEnhanced } from './features/custom
 import { AdminManagementPage } from './features/admin/components/AdminManagementPage';
 import { OwnersManager } from './features/users'
 import { SubscriptionManagementPage } from './features/subscriptions/components/SubscriptionManagementPage';
+import { ActivityDashboard } from './features/activity/ActivityDashboard';
+import { StoreActivityDashboard } from './features/activity/StoreActivityDashboard';
+import { TodayActivitiesDashboard } from './features/activity/TodayActivitiesDashboard';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -106,6 +109,30 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/activity"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <ActivityDashboard />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/activity/store/:storeId" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <StoreActivityDashboard />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+      <Route path="/activity/today" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <TodayActivitiesDashboard />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
