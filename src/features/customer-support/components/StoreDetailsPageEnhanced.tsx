@@ -22,7 +22,13 @@ import {
   Eye,
   AlertCircle,
   Star,
-  Zap
+  Zap,
+  X,
+  Copy,
+  ExternalLink,
+  CheckCircle,
+  XCircle,
+  Clock
 } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
@@ -34,7 +40,8 @@ import type {
   PurchasePlansResponse, 
   SalesResponse, 
   ExpensesResponse,
-  PaymentsResponse 
+  PaymentsResponse,
+  Payment
 } from '../types/store';
 import { toast } from 'react-hot-toast';
 
@@ -49,6 +56,31 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
     storeData?: any;
     customerData?: any;
   };
+
+  // Helper function to get payments array from either format
+  const getPaymentsArray = (payments: PaymentsResponse | Payment[] | null): Payment[] => {
+    if (!payments) return [];
+    if (Array.isArray(payments)) return payments;
+    return payments.response_body || [];
+  };
+
+  // Helper function to get payments count
+  const getPaymentsCount = (payments: PaymentsResponse | Payment[] | null): number => {
+    if (!payments) return 0;
+    if (Array.isArray(payments)) return payments.length;
+    return payments.response_body?.length || 0;
+  };
+
+  // Handle payment detail view
+  const handleViewPayment = (payment: Payment) => {
+    setSelectedPayment(payment);
+    setIsPaymentModalOpen(true);
+  };
+
+  const closePaymentModal = () => {
+    setIsPaymentModalOpen(false);
+    setSelectedPayment(null);
+  };
   const userId = locationState?.userId;
   const passedStoreData = locationState?.storeData;
   // const customerData = locationState?.customerData;
@@ -60,7 +92,9 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
   const [purchases, setPurchases] = useState<PurchasePlansResponse | null>(null);
   const [sales, setSales] = useState<SalesResponse | null>(null);
   const [expenses, setExpenses] = useState<ExpensesResponse | null>(null);
-  const [payments, setPayments] = useState<PaymentsResponse | null>(null);
+  const [payments, setPayments] = useState<PaymentsResponse | Payment[] | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [saleType, setSaleType] = useState<'QUOTATION' | 'DIRECT'>('DIRECT');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -158,7 +192,6 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
           break;
         case 'payments':
           if (userId && !payments) {
-            console.log('Fetching payments...');
             const data = await customerService.getUserPayments(userId);
             setPayments(data);
           }
@@ -840,7 +873,7 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
                       <div className="flex items-center space-x-4">
                         <h3 className="text-xl font-bold text-gray-900">Payment History</h3>
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-                          {payments.response_body.length} payments
+                          {getPaymentsCount(payments)} payments
                         </span>
                       </div>
                       <Button variant="secondary" size="sm" className="flex">
@@ -864,7 +897,7 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {payments.response_body?.map((payment, index) => (
+                          {getPaymentsArray(payments).map((payment: Payment, index: number) => (
                             <tr key={payment.id || `payment-${index}`} className="hover:bg-gray-50 transition-colors">
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm font-medium text-gray-900">{payment.paymentReference}</div>
@@ -912,7 +945,13 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
                                 )}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-center">
-                                <Button variant="ghost" size="sm" className="text-primary-600 hover:text-primary-900">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-primary-600 hover:text-primary-900"
+                                  onClick={() => handleViewPayment(payment)}
+                                  title="View payment details"
+                                >
                                   <Eye className="w-4 h-4" />
                                 </Button>
                               </td>
@@ -923,12 +962,292 @@ export const StoreDetailsPageEnhanced: React.FC = () => {
                     </div>
                   </div>
                 )}
+                {activeTab === 'payments' && !payments && (
+                  <div className="space-y-4">
+                    <div className="text-center py-8">
+                      <div className="text-gray-500">
+                        <p>No payments data available</p>
+                        <p className="text-sm">Debug: payments state is null or undefined</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
       </Card>
       </div>
+
+      {/* Payment Detail Modal */}
+      {isPaymentModalOpen && selectedPayment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      {/* Modal Header */}
+      <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center space-x-3">
+          <div className={`p-2 rounded-full ${
+            selectedPayment.status === 'COMPLETED' ? 'bg-green-100' :
+            selectedPayment.status === 'FAILED' ? 'bg-red-100' :
+            selectedPayment.status === 'PROCESSING' ? 'bg-yellow-100' :
+            'bg-gray-100'
+          }`}>
+            {selectedPayment.status === 'COMPLETED' ? (
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            ) : selectedPayment.status === 'FAILED' ? (
+              <XCircle className="w-6 h-6 text-red-600" />
+            ) : selectedPayment.status === 'PROCESSING' ? (
+              <Clock className="w-6 h-6 text-yellow-600" />
+            ) : (
+              <CreditCard className="w-6 h-6 text-gray-600" />
+            )}
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Payment Details</h2>
+            <p className="text-sm text-gray-600">{selectedPayment.paymentReference}</p>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={closePaymentModal}
+          className="text-gray-400 hover:text-gray-600"
+        >
+          <X className="w-5 h-5" />
+        </Button>
+      </div>
+
+      {/* Modal Content */}
+      <div className="p-6 space-y-6">
+        {/* Payment Status and Basic Info */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="p-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900">
+                {formatCurrency(selectedPayment.amount)} {selectedPayment.currency}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">Amount</div>
+            </div>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="text-center">
+              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                selectedPayment.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                selectedPayment.status === 'PROCESSING' ? 'bg-yellow-100 text-yellow-800' :
+                selectedPayment.status === 'FAILED' ? 'bg-red-100 text-red-800' :
+                selectedPayment.status === 'PENDING' ? 'bg-blue-100 text-blue-800' :
+                'bg-gray-100 text-gray-800'
+              }`}>
+                {selectedPayment.status}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">Status</div>
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <div className="text-center">
+              <div className="text-lg font-semibold text-gray-900">
+                {selectedPayment.paymentMethod.replace('_', ' ')}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">Payment Method</div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Subscription Details */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <Package className="w-5 h-5 mr-2" />
+            Subscription Details
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-gray-600">Plan Name</label>
+              <div className="text-sm text-gray-900 mt-1">{selectedPayment.planName}</div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-600">Subscription Code</label>
+              <div className="text-sm text-gray-900 mt-1 flex items-center">
+                {selectedPayment.subscriptionCode}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigator.clipboard.writeText(selectedPayment.subscriptionCode)}
+                  className="ml-2 p-1"
+                >
+                  <Copy className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-600">Subscription ID</label>
+              <div className="text-sm text-gray-900 mt-1 font-mono">{selectedPayment.subscriptionId}</div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-600">Mobile Number</label>
+              <div className="text-sm text-gray-900 mt-1">{selectedPayment.mobileNumber}</div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Payment References */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <Hash className="w-5 h-5 mr-2" />
+            Payment References
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-gray-600">Payment Reference</label>
+              <div className="text-sm text-gray-900 mt-1 flex items-center font-mono">
+                {selectedPayment.paymentReference}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigator.clipboard.writeText(selectedPayment.paymentReference)}
+                  className="ml-2 p-1"
+                >
+                  <Copy className="w-3 h-3" />
+                </Button>
+              </div>
+            </div>
+            {selectedPayment.externalReference && (
+              <div>
+                <label className="text-sm font-medium text-gray-600">External Reference</label>
+                <div className="text-sm text-gray-900 mt-1 flex items-center font-mono">
+                  {selectedPayment.externalReference}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigator.clipboard.writeText(selectedPayment.externalReference!)}
+                    className="ml-2 p-1"
+                  >
+                    <Copy className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Timeline */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <Clock className="w-5 h-5 mr-2" />
+            Payment Timeline
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <div>
+                <div className="text-sm font-medium text-gray-900">Payment Initiated</div>
+                <div className="text-xs text-gray-600">{formatDate(selectedPayment.initiatedAt)}</div>
+              </div>
+            </div>
+            
+            {selectedPayment.completedAt && (
+              <div className="flex items-center space-x-3">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div>
+                  <div className="text-sm font-medium text-green-700">Payment Completed</div>
+                  <div className="text-xs text-gray-600">{formatDate(selectedPayment.completedAt)}</div>
+                </div>
+              </div>
+            )}
+            
+            {selectedPayment.failedAt && (
+              <div className="flex items-center space-x-3">
+                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                <div>
+                  <div className="text-sm font-medium text-red-700">Payment Failed</div>
+                  <div className="text-xs text-gray-600">{formatDate(selectedPayment.failedAt)}</div>
+                  {selectedPayment.failureReason && (
+                    <div className="text-xs text-red-600 mt-1">{selectedPayment.failureReason}</div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <div>
+                <div className="text-sm font-medium text-gray-900">Expires At</div>
+                <div className="text-xs text-gray-600">{formatDate(selectedPayment.expiresAt)}</div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Gateway Response (if available) */}
+        {selectedPayment.gatewayResponse && (
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <ExternalLink className="w-5 h-5 mr-2" />
+              Gateway Response
+            </h3>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-gray-600">Gateway ID:</span>
+                  <span className="ml-2 font-mono">{selectedPayment.gatewayResponse.id}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Channel:</span>
+                  <span className="ml-2">{selectedPayment.gatewayResponse.channel}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Status:</span>
+                  <span className="ml-2">{selectedPayment.gatewayResponse.status}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600">Created:</span>
+                  <span className="ml-2">{new Date(selectedPayment.gatewayResponse.createdAt).toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Additional Info */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-medium text-gray-600">Description:</span>
+              <div className="mt-1 text-gray-900">{selectedPayment.description}</div>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Retry Count:</span>
+              <span className="ml-2 text-gray-900">{selectedPayment.retryCount}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Refunded:</span>
+              <span className="ml-2 text-gray-900">{selectedPayment.isRefunded ? 'Yes' : 'No'}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Created:</span>
+              <span className="ml-2 text-gray-900">{formatDate(selectedPayment.createdAt)}</span>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Modal Footer */}
+      <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
+        <Button variant="secondary" onClick={closePaymentModal}>
+          Close
+        </Button>
+        {selectedPayment.status === 'FAILED' && (
+          <Button variant="primary" className="flex items-center space-x-2 hidden">
+            <RefreshCw className="w-4 h-4" />
+            <span>Retry Payment</span>
+          </Button>
+        )}
+      </div>
+    </div>
+  </div>
+)}
     </>
   );
 };

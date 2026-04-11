@@ -148,11 +148,11 @@ export interface Expense {
 }
 
 export interface PaymentsResponse {
+  message: string;
+  timestamp: string;
   response_code: number;
   response_status: string;
   response_body: Payment[];
-  timestamp: string;
-  message: string;
 }
 
 export interface Payment {
@@ -174,4 +174,10 @@ export interface Payment {
   expiresAt: string;
   description: string;
   failureReason?: string;
+  gatewayResponse?: any;
+  webhookPayload?: any;
+  retryCount: number;
+  isRefunded: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
