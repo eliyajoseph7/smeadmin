@@ -8,19 +8,22 @@ import {
   CreditCard,
   Crown,
   Smartphone,
+  Video,
 } from "lucide-react";
 import { UnitOfMeasureManager } from "./UnitOfMeasureManager";
 import { CategoryManager } from "./CategoryManager";
 import { DiscountOptionsManager } from "./DiscountOptionsManager";
 import { SubscriptionPlansManager } from "./SubscriptionPlansManager";
 import { VersionCheckManager } from "./VersionCheckManager";
+import { VideoManagementManager } from "./VideoManagementManager";
 
 type SettingsTab =
   | "units"
   | "categories"
   | "discounts"
   | "subscriptions"
-  | "versions";
+  | "versions"
+  | "videos";
 
 const SETTINGS_ACTIVE_TAB_KEY = 'smeadmin_settings_active_tab';
 
@@ -29,7 +32,7 @@ export const SettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>(() => {
     if (typeof window !== 'undefined') {
       const savedTab = localStorage.getItem(SETTINGS_ACTIVE_TAB_KEY) as SettingsTab;
-      return savedTab && ['units', 'categories', 'discounts', 'subscriptions', 'versions', 'owners'].includes(savedTab) 
+      return savedTab && ['units', 'categories', 'discounts', 'subscriptions', 'versions', 'videos'].includes(savedTab) 
         ? savedTab 
         : 'units';
     }
@@ -73,6 +76,12 @@ export const SettingsPage: React.FC = () => {
       name: "Version Check",
       icon: Smartphone,
       description: "Manage app version checks",
+    },
+    {
+      id: "videos" as SettingsTab,
+      name: "Instructional Videos",
+      icon: Video,
+      description: "Manage learning videos for SME users",
     },
   ];
 
@@ -133,6 +142,7 @@ export const SettingsPage: React.FC = () => {
           {activeTab === "discounts" && <DiscountOptionsManager />}
           {activeTab === "subscriptions" && <SubscriptionPlansManager />}
           {activeTab === "versions" && <VersionCheckManager />}
+          {activeTab === "videos" && <VideoManagementManager />}
         </div>
       </div>
     </>

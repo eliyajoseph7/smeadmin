@@ -13,6 +13,7 @@ import { SubscriptionManagementPage } from './features/subscriptions/components/
 import { ActivityDashboard } from './features/activity/ActivityDashboard';
 import { StoreActivityDashboard } from './features/activity/StoreActivityDashboard';
 import { TodayActivitiesDashboard } from './features/activity/TodayActivitiesDashboard';
+import { BroadcastSmsPage } from './features/communications/components/BroadcastSmsPage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -95,6 +96,16 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <AdminLayout>
               <AdminManagementPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/broadcast-sms"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <BroadcastSmsPage />
             </AdminLayout>
           </ProtectedRoute>
         }

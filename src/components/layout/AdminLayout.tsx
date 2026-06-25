@@ -17,7 +17,8 @@ import {
   MessageSquare,
   Shield,
   CreditCard,
-  Activity
+  Activity,
+  Megaphone
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -43,6 +44,7 @@ const navigation: NavigationItem[] = [
   // { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Subscriptions', href: '/subscriptions', icon: CreditCard },
   { name: 'Customer Support', href: '/customer-support', icon: MessageSquare },
+  { name: 'Broadcast SMS', href: '/broadcast-sms', icon: Megaphone },
   { name: 'Admin Management', href: '/admin-management', icon: Shield },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
