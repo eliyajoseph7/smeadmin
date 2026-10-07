@@ -100,10 +100,13 @@ class CustomerService {
     }
   }
 
-  async getStoreSales(storeId: string, saleType: 'QUOTATION' | 'DIRECT' = 'DIRECT', page: number = 0, size: number = 20): Promise<SalesResponse | null> {
+  async getStoreSales(storeId: string, saleType: 'QUOTATION' | 'DIRECT' = 'DIRECT', page: number = 0, size: number = 20, startDate?: string, endDate?: string): Promise<SalesResponse | null> {
     try {
+      const startDateTime = startDate ? `${startDate}T00:00:00` : undefined;
+      const endDateTime = endDate ? `${endDate}T23:59:59.999999` : undefined;
+      const dateFilter = `${startDateTime ? `&startDate=${encodeURIComponent(startDateTime)}` : ''}${endDateTime ? `&endDate=${encodeURIComponent(endDateTime)}` : ''}`;
       const response = await this.apiClient.get<SalesResponse>(
-        `/sale-service/sales/store/${storeId}?saleType=${saleType}&page=${page}&size=${size}`
+        `/sale-service/sales/store/${storeId}?saleType=${saleType}&page=${page}&size=${size}${dateFilter}`
       );
       
       if (response.isSuccessful && response.data) {

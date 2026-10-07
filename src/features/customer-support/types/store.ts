@@ -58,8 +58,17 @@ export interface Product {
   isFeatured: boolean;
   isActive: boolean;
   stockDetails: StockDetails;
+  recentStockMovements?: StockMovement[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface StockMovement {
+  id: string;
+  movementType: 'IN' | 'OUT' | 'ADJUSTMENT' | string;
+  quantity: number;
+  reason: string;
+  createdAt: string;
 }
 
 export interface PurchasePlansResponse {
@@ -147,13 +156,7 @@ export interface Expense {
   updatedBy?: string;
 }
 
-export interface PaymentsResponse {
-  message: string;
-  timestamp: string;
-  response_code: number;
-  response_status: string;
-  response_body: Payment[];
-}
+export type PaymentsResponse = Payment[];
 
 export interface Payment {
   id: string;

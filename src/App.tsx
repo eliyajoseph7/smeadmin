@@ -14,6 +14,7 @@ import { ActivityDashboard } from './features/activity/ActivityDashboard';
 import { StoreActivityDashboard } from './features/activity/StoreActivityDashboard';
 import { TodayActivitiesDashboard } from './features/activity/TodayActivitiesDashboard';
 import { BroadcastSmsPage } from './features/communications/components/BroadcastSmsPage';
+import { ContactUsPage } from './features/website-management/components/ContactUsPage';
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -102,10 +103,38 @@ const AppRoutes: React.FC = () => {
       />
       <Route
         path="/broadcast-sms"
+        element={<Navigate to="/campaigns/broadcast-sms" replace />}
+      />
+      <Route
+        path="/campaigns"
+        element={<Navigate to="/campaigns/broadcast-sms" replace />}
+      />
+      <Route
+        path="/campaigns/broadcast-sms"
         element={
           <ProtectedRoute>
             <AdminLayout>
-              <BroadcastSmsPage />
+              <BroadcastSmsPage initialView="BROADCAST_SMS" />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/campaigns/list"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <BroadcastSmsPage initialView="CAMPAIGN_LIST" />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/campaigns/templates"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <BroadcastSmsPage initialView="MESSAGE_TEMPLATES" />
             </AdminLayout>
           </ProtectedRoute>
         }
@@ -116,6 +145,20 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <AdminLayout>
               <SubscriptionManagementPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/website-management"
+        element={<Navigate to="/website-management/contact-us" replace />}
+      />
+      <Route
+        path="/website-management/contact-us"
+        element={
+          <ProtectedRoute>
+            <AdminLayout>
+              <ContactUsPage />
             </AdminLayout>
           </ProtectedRoute>
         }

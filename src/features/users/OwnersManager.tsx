@@ -15,10 +15,66 @@ import {
   CheckCircle,
   XCircle,
   Package,
-  Users2
+  Users2,
+  Search,
+  Filter,
+  RotateCcw,
+  SlidersHorizontal
 } from 'lucide-react';
 import { OwnersApiService } from './services/owner.service';
 import type { Owner, OwnersQueryParams } from './types/owner';
+
+type OwnerFilters = {
+  query: string;
+  name: string;
+  phoneNumber: string;
+  sources: string[];
+  webActivated: string;
+  expiredPlan: string;
+  registeredFrom: string;
+  registeredTo: string;
+  minStores: string;
+  maxStores: string;
+  minActiveStores: string;
+  maxActiveStores: string;
+  minProducts: string;
+  maxProducts: string;
+  minActiveProducts: string;
+  maxActiveProducts: string;
+  minSales: string;
+  maxSales: string;
+  minStaff: string;
+  maxStaff: string;
+  minPurchases: string;
+  maxPurchases: string;
+};
+
+const defaultFilters: OwnerFilters = {
+  query: '',
+  name: '',
+  phoneNumber: '',
+  sources: [],
+  webActivated: '',
+  expiredPlan: '',
+  registeredFrom: '',
+  registeredTo: '',
+  minStores: '',
+  maxStores: '',
+  minActiveStores: '',
+  maxActiveStores: '',
+  minProducts: '',
+  maxProducts: '',
+  minActiveProducts: '',
+  maxActiveProducts: '',
+  minSales: '',
+  maxSales: '',
+  minStaff: '',
+  maxStaff: '',
+  minPurchases: '',
+  maxPurchases: '',
+};
+
+const sourceOptions = ['WEB', 'MOBILE', 'DEMO'];
 
 export const OwnersManager: React.FC = () => {
   const navigate = useNavigate();
@@ -36,17 +92,40 @@ export const OwnersManager: React.FC = () => {
   });
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [filters, setFilters] = useState<OwnerFilters>(defaultFilters);
+  const [advancedDraft, setAdvancedDraft] = useState<OwnerFilters>(defaultFilters);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const ownersService = new OwnersApiService();
 
-  const loadOwners = async () => {
+  const buildFilterParams = (filterState: OwnerFilters = filters): OwnersQueryParams => {
+    const params: OwnersQueryParams = {};
+
+    Object.entries(filterState).forEach(([key, value]) => {
+      if (key === 'sources') {
+        if (filterState.sources.length > 0) {
+          params.sources = filterState.sources;
+        }
+        return;
+      }
+
+      if (typeof value === 'string' && value.trim() !== '') {
+        (params as Record<string, string>)[key] = value.trim();
+      }
+    });
+
+    return params;
+  };
+
+  const loadOwners = async (filterState: OwnerFilters = filters) => {
     try {
       setLoading(true);
       const params: OwnersQueryParams = {
         page: pagination.page,
         size: pagination.size,
         sortBy,
-        sortDir
+        sortDir,
+        ...buildFilterParams(filterState)
       };
       const response = await ownersService.getOwners(params);
       
@@ -72,6 +151,91 @@ export const OwnersManager: React.FC = () => {
   useEffect(() => {
     loadOwners();
   }, [pagination.page, pagination.size, sortBy, sortDir]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setPagination(prev => ({ ...prev, page: 0 }));
+      if (pagination.page === 0) {
+        loadOwners();
+      }
+    }, 450);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [filters.query, filters.name, filters.phoneNumber]);
+
+  const handleFilterChange = (field: keyof OwnerFilters, value: string) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleAdvancedDraftChange = (field: keyof OwnerFilters, value: string) => {
+    setAdvancedDraft(prev => ({ ...prev, [field]: value }));
+  };
+
+  const toggleDraftSource = (source: string) => {
+    setAdvancedDraft(prev => ({
+      ...prev,
+      sources: prev.sources.includes(source)
+        ? prev.sources.filter(item => item !== source)
+        : [...prev.sources, source]
+    }));
+  };
+
+  const applyFilters = (nextFilters: OwnerFilters = filters) => {
+    setFilters(nextFilters);
+    setPagination(prev => ({ ...prev, page: 0 }));
+    if (pagination.page === 0) {
+      loadOwners(nextFilters);
+    }
+  };
+
+  const resetAdvancedFilters = (baseFilters: OwnerFilters = filters) => ({
+    ...baseFilters,
+    sources: [],
+    webActivated: '',
+    expiredPlan: '',
+    registeredFrom: '',
+    registeredTo: '',
+    minStores: '',
+    maxStores: '',
+    minActiveStores: '',
+    maxActiveStores: '',
+    minProducts: '',
+    maxProducts: '',
+    minActiveProducts: '',
+    maxActiveProducts: '',
+    minSales: '',
+    maxSales: '',
+    minStaff: '',
+    maxStaff: '',
+    minPurchases: '',
+    maxPurchases: '',
+  });
+
+  const openAdvancedFilters = () => {
+    setAdvancedDraft(filters);
+    setShowAdvancedFilters(true);
+  };
+
+  const cancelAdvancedFilters = () => {
+    const resetFilters = resetAdvancedFilters(filters);
+    setAdvancedDraft(resetFilters);
+    setShowAdvancedFilters(false);
+    applyFilters(resetFilters);
+  };
+
+  const applyAdvancedFilters = () => {
+    setShowAdvancedFilters(false);
+    applyFilters(advancedDraft);
+  };
+
+  const resetAllFilters = () => {
+    setFilters(defaultFilters);
+    setAdvancedDraft(defaultFilters);
+    setPagination(prev => ({ ...prev, page: 0 }));
+    if (pagination.page === 0) {
+      loadOwners(defaultFilters);
+    }
+  };
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -134,16 +298,83 @@ export const OwnersManager: React.FC = () => {
         icon={Users}
       />
 
-      <div className="space-y-6 px-2 py-8">
+      <div className="space-y-6 px-2 py-4">
+
+      <Card className="overflow-hidden border border-slate-200/70 bg-white">
+        <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="h-9 w-9 rounded-lg bg-primary-50 text-primary-700 flex items-center justify-center">
+                  <SlidersHorizontal className="h-5 w-5" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900">Registered Owners ({pagination.totalElements})</h3>
+              </div>
+              <p className="mt-1 text-sm text-slate-500">Search by owner profile. Results update as you type.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="secondary" onClick={resetAllFilters} className="inline-flex items-center gap-2">
+                <RotateCcw className="h-4 w-4" />
+                Reset Filters
+              </Button>
+              <Button type="button" onClick={openAdvancedFilters} className="inline-flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Advanced Filters
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Global Search</span>
+              <div className="mt-1 relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  value={filters.query}
+                  onChange={(event) => handleFilterChange('query', event.target.value)}
+                  className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
+                  placeholder="Name, phone, email, business"
+                />
+              </div>
+            </label>
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Name</span>
+              <input
+                value={filters.name}
+                onChange={(event) => handleFilterChange('name', event.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
+                placeholder="Owner or business name"
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Phone Number</span>
+              <input
+                value={filters.phoneNumber}
+                onChange={(event) => handleFilterChange('phoneNumber', event.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
+                placeholder="255..."
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Rows</span>
+              <select
+                value={pagination.size}
+                onChange={(event) => setPagination(prev => ({ ...prev, page: 0, size: Number(event.target.value) }))}
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </Card>
 
       {/* Owners Table */}
       <Card className="overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Registered Owners ({pagination.totalElements})
-          </h3>
-        </div>
-        
         {loading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
@@ -175,10 +406,22 @@ export const OwnersManager: React.FC = () => {
                       Stores
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      Source
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                       Subscription
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      Products
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                       Sales
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      Purchases
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      Last Sale
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                       <button
@@ -250,11 +493,12 @@ export const OwnersManager: React.FC = () => {
                             <Users2 className="w-3 h-3 mr-1" />
                             {owner.totalStaff} Staff
                           </div>
-                          <div className="flex items-center text-xs text-slate-500">
-                            <Package className="w-3 h-3 mr-1" />
-                            {owner.productStats.activeProducts} (active)/{owner.productStats.totalProducts} Products
-                          </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                          {owner.source || 'N/A'}
+                        </span>
                       </td>
                       <td className="px-6 py-5">
                         <div className="space-y-1">
@@ -271,15 +515,31 @@ export const OwnersManager: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-5">
+                        <div className="flex items-center text-sm font-medium text-slate-900">
+                          <Package className="w-4 h-4 mr-1 text-slate-400" />
+                          {owner.productStats.totalProducts}
+                        </div>
+                      </td>
+                      <td className="px-6 py-5">
                         <div className="space-y-1">
                           <div className="flex items-center text-sm text-slate-900 hidden">
                             {/* <DollarSign className="w-4 h-4 mr-1 text-green-500" /> */}
                             {owner.sales.totalRevenue ? formatCurrency(owner.sales.totalRevenue, 'TZS') : 'N/A'}
                           </div>
                           <div className="text-xs text-slate-600">
-                            <div>{owner.sales.totalSalesCount} sales</div>
+                            <div>{owner.sales.totalSalesCount}</div>
                             <div className="hidden">Profit: {owner.sales.totalProfit ? formatCurrency(owner.sales.totalProfit, 'TZS') : 'N/A'}</div>
                           </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="text-sm font-medium text-slate-900">
+                          {owner.purchases?.totalPurchases ?? 0}
+                        </div>
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="text-sm text-slate-900">
+                          {owner.sales.lastSaleDate ? formatDate(owner.sales.lastSaleDate) : 'N/A'}
                         </div>
                       </td>
                       <td className="px-6 py-5">
@@ -352,6 +612,138 @@ export const OwnersManager: React.FC = () => {
           </div>
         )}
       </Card>
+
+      <Modal
+        isOpen={showAdvancedFilters}
+        onClose={cancelAdvancedFilters}
+        title="Advanced Owner Filters"
+        size="2xl"
+      >
+        <div className="space-y-6">
+          <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Sources</span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {sourceOptions.map((source) => {
+                    const selected = advancedDraft.sources.includes(source);
+                    return (
+                      <button
+                        key={source}
+                        type="button"
+                        onClick={() => toggleDraftSource(source)}
+                        className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                          selected
+                            ? 'border-primary-500 bg-primary-50 text-primary-700'
+                            : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        {source}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <label className="block">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Web Activation</span>
+                <select
+                  value={advancedDraft.webActivated}
+                  onChange={(event) => handleAdvancedDraftChange('webActivated', event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
+                >
+                  <option value="">Any</option>
+                  <option value="true">Web activated</option>
+                  <option value="false">Not activated</option>
+                </select>
+              </label>
+              <label className="block">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Plan Expiry</span>
+                <select
+                  value={advancedDraft.expiredPlan}
+                  onChange={(event) => handleAdvancedDraftChange('expiredPlan', event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
+                >
+                  <option value="">Any</option>
+                  <option value="true">Expired plan</option>
+                  <option value="false">Active/non-expired plan</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-3 text-sm font-semibold text-slate-900">Registration Date</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className="block">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Registered From</span>
+                <input
+                  type="datetime-local"
+                  value={advancedDraft.registeredFrom}
+                  onChange={(event) => handleAdvancedDraftChange('registeredFrom', event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Registered To</span>
+                <input
+                  type="datetime-local"
+                  value={advancedDraft.registeredTo}
+                  onChange={(event) => handleAdvancedDraftChange('registeredTo', event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-3 text-sm font-semibold text-slate-900">Business Activity Ranges</div>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+              {[
+                ['Stores', 'minStores', 'maxStores'],
+                ['Active Stores', 'minActiveStores', 'maxActiveStores'],
+                ['Products', 'minProducts', 'maxProducts'],
+                ['Active Products', 'minActiveProducts', 'maxActiveProducts'],
+                ['Sales', 'minSales', 'maxSales'],
+                ['Staff', 'minStaff', 'maxStaff'],
+                ['Purchases', 'minPurchases', 'maxPurchases'],
+              ].map(([label, minKey, maxKey]) => (
+                <div key={label} className="rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      type="number"
+                      min="0"
+                      value={advancedDraft[minKey as keyof OwnerFilters] as string}
+                      onChange={(event) => handleAdvancedDraftChange(minKey as keyof OwnerFilters, event.target.value)}
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
+                      placeholder="Min"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      value={advancedDraft[maxKey as keyof OwnerFilters] as string}
+                      onChange={(event) => handleAdvancedDraftChange(maxKey as keyof OwnerFilters, event.target.value)}
+                      className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
+                      placeholder="Max"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+            <Button type="button" variant="secondary" onClick={cancelAdvancedFilters} className="inline-flex items-center justify-center gap-2">
+              <RotateCcw className="h-4 w-4" />
+              Cancel
+            </Button>
+            <Button type="button" onClick={applyAdvancedFilters} className="inline-flex items-center justify-center gap-2">
+              <Filter className="h-4 w-4" />
+              Apply Filters
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* View Owner Modal */}
       <Modal

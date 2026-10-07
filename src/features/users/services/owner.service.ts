@@ -25,8 +25,12 @@ export class OwnersApiService {
     };
 
     Object.entries(finalParams).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        queryParams.append(key, value.toString());
+      if (value !== undefined && value !== null && value !== '') {
+        if (Array.isArray(value)) {
+          value.filter(Boolean).forEach((item) => queryParams.append(key, item.toString()));
+        } else {
+          queryParams.append(key, value.toString());
+        }
       }
     });
 
