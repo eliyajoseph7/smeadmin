@@ -18,7 +18,8 @@ import {
   Shield,
   CreditCard,
   Activity,
-  Megaphone
+  Megaphone,
+  Globe
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -33,6 +34,10 @@ interface NavigationItem {
   href: string;
   icon: React.ComponentType<any>;
   badge?: number;
+  children?: Array<{
+    name: string;
+    href: string;
+  }>;
 }
 
 const navigation: NavigationItem[] = [
@@ -44,7 +49,24 @@ const navigation: NavigationItem[] = [
   // { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Subscriptions', href: '/subscriptions', icon: CreditCard },
   { name: 'Customer Support', href: '/customer-support', icon: MessageSquare },
-  { name: 'Broadcast SMS', href: '/broadcast-sms', icon: Megaphone },
+  {
+    name: 'Campaigns',
+    href: '/campaigns',
+    icon: Megaphone,
+    children: [
+      { name: 'Broadcast SMS', href: '/campaigns/broadcast-sms' },
+      { name: 'Campaign List', href: '/campaigns/list' },
+      { name: 'Message Templates', href: '/campaigns/templates' },
+    ],
+  },
+  {
+    name: 'Website Management',
+    href: '/website-management',
+    icon: Globe,
+    children: [
+      { name: 'Contact Us', href: '/website-management/contact-us' },
+    ],
+  },
   { name: 'Admin Management', href: '/admin-management', icon: Shield },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
@@ -98,7 +120,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // Filter navigation items based on search query
   const filteredNavigation = navigation.filter(item => 
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.children?.some(child => child.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const handleLogout = () => {
@@ -172,38 +195,62 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-2">
         {filteredNavigation.map((item) => {
-          const isActive = isActiveRoute(item.href);
+          const hasChildren = Boolean(item.children?.length);
+          const isActive = isActiveRoute(item.href) || Boolean(item.children?.some(child => isActiveRoute(child.href)));
           const Icon = item.icon;
           
           return (
-            <button
-              key={item.name}
-              onClick={() => navigate(item.href)}
-              className={cn(
-                'w-full flex items-center justify-between p-3 rounded-lg text-left transition-all duration-200',
-                'hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500',
-                isActive 
-                  ? 'bg-primary-50 text-primary-700 border border-primary-200' 
-                  : 'text-neutral-700 hover:text-neutral-900',
-                collapsed && 'justify-center'
-              )}
-            >
-              <div className="flex items-center space-x-3">
-                <Icon className={cn(
-                  'w-5 h-5 transition-colors',
-                  isActive ? 'text-primary-600' : 'text-neutral-500'
-                )} />
-                {!collapsed && (
-                  <span className="font-medium text-sm">{item.name}</span>
+            <div key={item.name}>
+              <button
+                onClick={() => navigate(hasChildren ? item.children![0].href : item.href)}
+                className={cn(
+                  'w-full flex items-center justify-between p-3 rounded-lg text-left transition-all duration-200',
+                  'hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500',
+                  isActive
+                    ? 'bg-primary-50 text-primary-700 border border-primary-200'
+                    : 'text-neutral-700 hover:text-neutral-900',
+                  collapsed && 'justify-center'
                 )}
-              </div>
-              
-              {!collapsed && item.badge && (
-                <span className="bg-primary-100 text-primary-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                  {item.badge}
-                </span>
+              >
+                <div className="flex items-center space-x-3">
+                  <Icon className={cn(
+                    'w-5 h-5 transition-colors',
+                    isActive ? 'text-primary-600' : 'text-neutral-500'
+                  )} />
+                  {!collapsed && (
+                    <span className="font-medium text-sm">{item.name}</span>
+                  )}
+                </div>
+
+                {!collapsed && item.badge && (
+                  <span className="bg-primary-100 text-primary-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+
+              {!collapsed && hasChildren && isActive && (
+                <div className="ml-8 mt-2 space-y-1">
+                  {item.children!.map((child) => {
+                    const childActive = isActiveRoute(child.href);
+                    return (
+                      <button
+                        key={child.name}
+                        onClick={() => navigate(child.href)}
+                        className={cn(
+                          'w-full rounded-lg px-3 py-2 text-left text-sm transition-colors',
+                          childActive
+                            ? 'bg-primary-100 font-semibold text-primary-700'
+                            : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
+                        )}
+                      >
+                        {child.name}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
-            </button>
+            </div>
           );
         })}
       </nav>

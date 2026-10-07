@@ -9,6 +9,7 @@ export interface Subscription {
 
 export interface Sales {
   totalSalesCount: number;
+  lastSaleDate?: string | null;
   totalPaymentsCollected?: number;
   totalRevenue?: number;
   totalProfit?: number;
@@ -20,11 +21,16 @@ export interface ProductStats {
   activeProducts: number;
 }
 
+export interface PurchaseStats {
+  totalPurchases: number;
+}
+
 export interface Owner {
   ownerId: string;
   phoneNumber: string;
   email: string;
   fullName: string;
+  source?: string;
   registeredAt: string;
   webActivated: boolean;
   totalStores: number;
@@ -33,6 +39,7 @@ export interface Owner {
   totalStaff: number;
   productStats: ProductStats;
   sales: Sales;
+  purchases?: PurchaseStats;
 }
 
 export interface OwnersResponse {
@@ -70,4 +77,28 @@ export interface OwnersQueryParams {
   size?: number;
   sortBy?: string;
   sortDir?: 'asc' | 'desc';
+  query?: string;
+  name?: string;
+  phoneNumber?: string;
+  source?: string;
+  type?: string;
+  sources?: string[];
+  expiredPlan?: boolean | string;
+  webActivated?: boolean | string;
+  registeredFrom?: string;
+  registeredTo?: string;
+  minStores?: number | string;
+  maxStores?: number | string;
+  minActiveStores?: number | string;
+  maxActiveStores?: number | string;
+  minProducts?: number | string;
+  maxProducts?: number | string;
+  minActiveProducts?: number | string;
+  maxActiveProducts?: number | string;
+  minSales?: number | string;
+  maxSales?: number | string;
+  minStaff?: number | string;
+  maxStaff?: number | string;
+  minPurchases?: number | string;
+  maxPurchases?: number | string;
 }
