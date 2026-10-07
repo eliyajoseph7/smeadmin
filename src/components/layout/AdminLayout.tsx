@@ -13,7 +13,6 @@ import {
   Search,
   User,
   LogOut,
-  Store,
   MessageSquare,
   Shield,
   CreditCard,
@@ -119,14 +118,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="flex items-center justify-between p-4 border-b border-neutral-200">
         {!collapsed ? (
           <div className="flex-1">
-            {/* Store Header */}
+            {/* Brand header */}
             <div className="flex items-center space-x-3 px-2 py-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-sm">
-                <Store className="w-5 h-5 text-white" />
-              </div>
+              <img src="/crdb-logo.svg" alt="CRDB Bank" className="h-11 w-16 object-contain" />
               <div className="text-left">
                 <div className="text-base font-bold text-neutral-900">
-                  RINO Admin
+                  CRDB Admin
                 </div>
                 <div className="text-xs text-neutral-500 flex items-center space-x-1">
                   <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
@@ -136,9 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
         ) : (
-          <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-sm">
-            <Store className="w-4 h-4 text-white" />
-          </div>
+          <img src="/crdb-logo.svg" alt="CRDB Bank" className="h-8 w-8 object-contain" />
         )}
         <Button
           variant="ghost"
@@ -221,7 +216,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   {admin?.fullName || 'Admin User'}
                 </p>
                 <p className="text-xs text-neutral-600 truncate">
-                  {admin?.email || 'admin@rino.co.tz'}
+                  {admin?.email || 'Admin account'}
                 </p>
               </div>
             </div>

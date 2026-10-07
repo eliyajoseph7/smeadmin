@@ -154,7 +154,7 @@ export const BroadcastSmsPage: React.FC = () => {
       <div className="px-2 py-6">
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)]">
           <Card className="overflow-hidden p-0">
-            <div className="border-b border-emerald-100 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 px-6 py-6 text-white">
+            <div className="border-b border-primary-700 bg-gradient-to-r from-[#115635] via-[#104c30] to-[#092c1d] px-6 py-6 text-white">
               <div className="flex items-start gap-4">
                 <div className="rounded-2xl bg-white/15 p-3 backdrop-blur-sm">
                   <MessageSquareText className="h-6 w-6" />

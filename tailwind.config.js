@@ -7,24 +7,24 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Flutter app's exact primary color: #27906D
+        // CRDB primary color: #115635
         primary: {
-          50: '#f0fdf9',
-          100: '#ccfbef',
-          200: '#99f6e0',
-          300: '#5eead4',
-          400: '#2dd4bf',
-          500: '#27906D', // Exact Flutter primary color
-          600: '#0f766e',
-          700: '#0f5d5d',
-          800: '#134e4a',
-          900: '#134e4a',
-          950: '#042f2e',
+          50: '#eef5f1',
+          100: '#d9e9df',
+          200: '#b8d8c5',
+          300: '#89bda0',
+          400: '#5b9d75',
+          500: '#115635', // CRDB primary color
+          600: '#0d482c',
+          700: '#0a3c24',
+          800: '#08301d',
+          900: '#08301d',
+          950: '#041b11',
         },
         // Flutter app's text colors
         text: {
           primary: '#121315',   // Flutter headings
-          secondary: '#102F43', // Flutter body text
+          secondary: '#183221', // Flutter body text
           muted: '#6B7280',     // Flutter small text
         },
         // Flutter app's background colors
@@ -33,17 +33,17 @@ export default {
           card: '#FFFFFF',      // Flutter card background
         },
         secondary: {
-          50: '#fef7ee',
-          100: '#fdedd3',
-          200: '#fbd7a5',
-          300: '#f8bb6d',
-          400: '#f59333',
-          500: '#f37316',
-          600: '#e4560c',
-          700: '#bd3f0c',
-          800: '#973211',
-          900: '#7a2a12',
-          950: '#421307',
+          50: '#eef5f0',
+          100: '#d6e9dc',
+          200: '#b4d8c0',
+          300: '#8abe9c',
+          400: '#5a9e72',
+          500: '#2f7652',
+          600: '#286645',
+          700: '#205537',
+          800: '#19462e',
+          900: '#153a28',
+          950: '#102b1e',
         },
         success: {
           50: '#f0fdf4',

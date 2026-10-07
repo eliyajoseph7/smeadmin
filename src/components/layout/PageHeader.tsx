@@ -71,7 +71,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
                 </div>
                 <div className="text-left hidden sm:block">
                   <p className="text-sm font-medium text-neutral-900">{admin?.fullName || 'Admin User'}</p>
-                  <p className="text-xs text-neutral-600">{admin?.email || 'admin@rino.co.tz'}</p>
+                  <p className="text-xs text-neutral-600">{admin?.email || 'Admin account'}</p>
                 </div>
                 <ChevronDown className="w-4 h-4 text-neutral-400" />
               </button>
@@ -86,7 +86,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
                       </div>
                       <div>
                         <p className="font-medium text-neutral-900">{admin?.fullName || 'Admin User'}</p>
-                        <p className="text-sm text-neutral-600">{admin?.email || 'admin@rino.co.tz'}</p>
+                        <p className="text-sm text-neutral-600">{admin?.email || 'Admin account'}</p>
                       </div>
                     </div>
                   </div>

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../contexts/AuthContext';
 import { 
-  SparklesIcon, 
   EyeIcon, 
   EyeSlashIcon,
   EnvelopeIcon,
@@ -91,9 +90,9 @@ const LoginPage: React.FC = () => {
       {/* Dynamic Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating Orbs */}
-        <div className="absolute top-20 left-20 w-32 h-32 bg-gradient-to-r from-primary-400/30 to-blue-400/30 rounded-full blur-xl animate-bounce" style={{ animationDelay: "0s", animationDuration: "3s" }}></div>
+        <div className="absolute top-20 left-20 w-32 h-32 bg-gradient-to-r from-primary-400/30 to-primary-300/30 rounded-full blur-xl animate-bounce" style={{ animationDelay: "0s", animationDuration: "3s" }}></div>
         <div className="absolute top-40 right-32 w-24 h-24 bg-gradient-to-r from-emerald-400/40 to-primary-400/40 rounded-full blur-lg animate-pulse" style={{ animationDelay: "1s" }}></div>
-        <div className="absolute bottom-32 left-40 w-40 h-40 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-2xl animate-ping" style={{ animationDelay: "2s", animationDuration: "4s" }}></div>
+        <div className="absolute bottom-32 left-40 w-40 h-40 bg-gradient-to-r from-primary-300/20 to-secondary-300/20 rounded-full blur-2xl animate-ping" style={{ animationDelay: "2s", animationDuration: "4s" }}></div>
         
         {/* Geometric Shapes */}
         <div className="absolute top-1/4 right-1/4 w-16 h-16 border-2 border-primary-400/30 rotate-45 animate-spin" style={{ animationDuration: "8s" }}></div>
@@ -116,7 +115,7 @@ const LoginPage: React.FC = () => {
         </div>
         
         {/* Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-900/10 via-transparent to-purple-900/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-900/10 via-transparent to-primary-900/10"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/5 to-transparent"></div>
       </div>
 
@@ -128,17 +127,17 @@ const LoginPage: React.FC = () => {
             {/* Floating Icon with Multiple Layers */}
             <div className="relative mx-auto lg:mx-0 w-32 h-32 mb-8">
               {/* Outer Glow Ring */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-400/30 to-purple-400/30 animate-pulse"></div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-400/30 to-secondary-400/30 animate-pulse"></div>
               {/* Middle Ring */}
-              <div className="absolute inset-2 rounded-full bg-gradient-to-r from-primary-500/50 to-purple-500/50 animate-spin" style={{ animationDuration: "8s" }}></div>
+              <div className="absolute inset-2 rounded-full bg-gradient-to-r from-primary-500/50 to-secondary-500/50 animate-spin" style={{ animationDuration: "8s" }}></div>
               {/* Inner Icon Container */}
-              <div className="absolute inset-4 rounded-full bg-gradient-to-br from-primary-500 via-primary-600 to-purple-600 flex items-center justify-center shadow-2xl">
-                <SparklesIcon className="w-12 h-12 text-white drop-shadow-lg" />
+              <div className="absolute inset-4 rounded-full bg-white flex items-center justify-center p-3 shadow-2xl">
+                <img src="/crdb-logo.svg" alt="CRDB Bank" className="w-full" />
               </div>
               {/* Floating Particles */}
               <div className="absolute -top-2 -right-2 w-4 h-4 bg-emerald-400 rounded-full animate-bounce shadow-lg"></div>
-              <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
-              <div className="absolute top-1/2 -right-3 w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
+              <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-primary-300 rounded-full animate-ping"></div>
+              <div className="absolute top-1/2 -right-3 w-2 h-2 bg-secondary-400 rounded-full animate-pulse"></div>
             </div>
 
             {/* Animated Title */}
@@ -155,7 +154,7 @@ const LoginPage: React.FC = () => {
             
             <p className="text-gray-600 text-lg font-medium mt-6 max-w-md mx-auto lg:mx-0 leading-relaxed">
               Sign in to your 
-              <span className="text-primary-600 font-semibold"> RINO Admin</span> dashboard and manage your business operations
+              <span className="text-primary-600 font-semibold"> CRDB Admin</span> dashboard and manage your business operations
             </p>
           </div>
 
@@ -165,13 +164,13 @@ const LoginPage: React.FC = () => {
             {/* Spectacular Login Form */}
             <div className="relative">
               {/* Form Glow Effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary-500/20 via-purple-500/20 to-primary-500/20 rounded-3xl blur-lg animate-pulse"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary-500/20 via-secondary-500/20 to-primary-500/20 rounded-3xl blur-lg animate-pulse"></div>
               
               {/* Main Form Card */}
               <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20 animate-scaleIn">
                 {/* Form Header Decoration */}
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-16 h-8 bg-gradient-to-r from-primary-500 to-purple-500 rounded-full shadow-lg"></div>
+                  <div className="w-16 h-8 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full shadow-lg"></div>
                 </div>
 
                 {/* Admin Login Form */}

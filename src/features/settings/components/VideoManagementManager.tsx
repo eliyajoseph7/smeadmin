@@ -437,7 +437,7 @@ export const VideoManagementManager: React.FC = () => {
                   setFormData((current) => ({ ...current, description: event.target.value }))
                 }
                 rows={4}
-                placeholder="Video ya maelekezo ya kuongeza bidhaa kwenye mfumo wa RINO"
+                placeholder="Video ya maelekezo ya kuongeza bidhaa kwenye mfumo wa CRDB"
                 className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-primary-400 focus:ring-4 focus:ring-primary-100"
               />
             </div>

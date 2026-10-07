@@ -520,7 +520,7 @@ export const OwnersManager: React.FC = () => {
               <Button
                 onClick={() => handleViewMoreInCustomerSupport(selectedOwner)}
                 variant="primary"
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-primary-600 hover:bg-primary-700"
               >
                 View More in Customer Support
               </Button>

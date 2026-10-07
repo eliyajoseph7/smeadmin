@@ -44,7 +44,7 @@ export const Dashboard: React.FC = () => {
       {/* Page Header */}
       <PageHeader
         title="Dashboard"
-        description="Welcome to your RINO Admin dashboard"
+        description="Welcome to your CRDB Admin dashboard"
         icon={LayoutDashboard}
       />
 
