@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Modal } from '../../../components/ui/Modal';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { subscriptionApiService } from '../../../services/api/subscription-api-service';
-import type { Subscription, SubscriptionStatus } from '../../../types/subscription';
+import type { Subscription, SubscriptionFilters, SubscriptionStatus } from '../../../types/subscription';
 import { 
   CreditCard, 
   Search,
@@ -18,10 +19,19 @@ import {
 import toast from 'react-hot-toast';
 
 export const SubscriptionManagementPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusParam = searchParams.get('status');
+  const selectedStatus: SubscriptionStatus | '' =
+    statusParam === 'ACTIVE' || statusParam === 'PENDING' || statusParam === 'TRIAL' ||
+    statusParam === 'EXPIRED' || statusParam === 'CANCELLED' ? statusParam : '';
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<SubscriptionStatus | ''>('');
+  const statusFilter = selectedStatus;
+  const setStatusFilter = (status: SubscriptionStatus | '') => {
+    setSearchParams(status ? { status } : {});
+    setCurrentPage(0);
+  };
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize] = useState(20);
   const [totalElements, setTotalElements] = useState(0);
@@ -32,7 +42,7 @@ export const SubscriptionManagementPage: React.FC = () => {
   const loadSubscriptions = async () => {
     setLoading(true);
     try {
-      const filters: any = {};
+      const filters: SubscriptionFilters = {};
       if (statusFilter) filters.status = statusFilter;
       if (searchQuery) filters.search = searchQuery;
       filters.page = currentPage;
@@ -42,8 +52,8 @@ export const SubscriptionManagementPage: React.FC = () => {
       setSubscriptions(response.content);
       setTotalElements(response.totalElements);
       setTotalPages(response.totalPages);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to load subscriptions');
+    } catch (error) {
+      toast.error((error instanceof Error ? error.message : undefined) || 'Failed to load subscriptions');
       console.error('Error loading subscriptions:', error);
     } finally {
       setLoading(false);
@@ -60,6 +70,8 @@ export const SubscriptionManagementPage: React.FC = () => {
         return 'bg-green-100 text-green-800';
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800';
+      case 'TRIAL':
+        return 'bg-blue-100 text-blue-800';
       case 'EXPIRED':
         return 'bg-red-100 text-red-800';
       case 'CANCELLED':
@@ -74,6 +86,8 @@ export const SubscriptionManagementPage: React.FC = () => {
       case 'ACTIVE':
         return <CheckCircle className="w-4 h-4" />;
       case 'PENDING':
+        return <Clock className="w-4 h-4" />;
+      case 'TRIAL':
         return <Clock className="w-4 h-4" />;
       case 'EXPIRED':
         return <XCircle className="w-4 h-4" />;
@@ -144,6 +158,7 @@ export const SubscriptionManagementPage: React.FC = () => {
                 <option value="">All Status</option>
                 <option value="ACTIVE">Active</option>
                 <option value="PENDING">Pending</option>
+                <option value="TRIAL">Trial</option>
                 <option value="EXPIRED">Expired</option>
                 <option value="CANCELLED">Cancelled</option>
               </select>
