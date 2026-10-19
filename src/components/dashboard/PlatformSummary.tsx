@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Card } from '../ui/Card';
 import { 
   Users, 
@@ -220,48 +221,27 @@ export const PlatformSummary: React.FC = () => {
           <h3 className="text-lg font-semibold text-gray-900">Subscription Statistics</h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <CheckCircle className="w-5 h-5 text-green-500 mr-1" />
-              <span className="text-sm text-gray-600">Active</span>
-            </div>
-            <p className="text-xl font-bold text-green-600">{formatNumber(summary.subscriptionStats.activeSubscriptions)}</p>
-          </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <Clock className="w-5 h-5 text-yellow-500 mr-1" />
-              <span className="text-sm text-gray-600">Pending</span>
-            </div>
-            <p className="text-xl font-bold text-yellow-600">{formatNumber(summary.subscriptionStats.pendingSubscriptions)}</p>
-          </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <Calendar className="w-5 h-5 text-blue-500 mr-1" />
-              <span className="text-sm text-gray-600">Trial</span>
-            </div>
-            <p className="text-xl font-bold text-blue-600">{formatNumber(summary.subscriptionStats.trialSubscriptions)}</p>
-          </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <AlertTriangle className="w-5 h-5 text-orange-500 mr-1" />
-              <span className="text-sm text-gray-600">Expired</span>
-            </div>
-            <p className="text-xl font-bold text-orange-600">{formatNumber(summary.subscriptionStats.expiredSubscriptions)}</p>
-          </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <XCircle className="w-5 h-5 text-red-500 mr-1" />
-              <span className="text-sm text-gray-600">Cancelled</span>
-            </div>
-            <p className="text-xl font-bold text-red-600">{formatNumber(summary.subscriptionStats.cancelledSubscriptions)}</p>
-          </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-2">
-              <TrendingUp className="w-5 h-5 text-purple-500 mr-1" />
-              <span className="text-sm text-gray-600">Total</span>
-            </div>
-            <p className="text-xl font-bold text-purple-600">{formatNumber(summary.subscriptionStats.totalSubscriptions)}</p>
-          </div>
+          {[
+            { label: 'Active', status: 'ACTIVE', count: summary.subscriptionStats.activeSubscriptions, icon: CheckCircle, iconColor: 'text-green-500', countColor: 'text-green-600' },
+            { label: 'Pending', status: 'PENDING', count: summary.subscriptionStats.pendingSubscriptions, icon: Clock, iconColor: 'text-yellow-500', countColor: 'text-yellow-600' },
+            { label: 'Trial', status: 'TRIAL', count: summary.subscriptionStats.trialSubscriptions, icon: Calendar, iconColor: 'text-blue-500', countColor: 'text-blue-600' },
+            { label: 'Expired', status: 'EXPIRED', count: summary.subscriptionStats.expiredSubscriptions, icon: AlertTriangle, iconColor: 'text-orange-500', countColor: 'text-orange-600' },
+            { label: 'Cancelled', status: 'CANCELLED', count: summary.subscriptionStats.cancelledSubscriptions, icon: XCircle, iconColor: 'text-red-500', countColor: 'text-red-600' },
+            { label: 'Total', status: '', count: summary.subscriptionStats.totalSubscriptions, icon: TrendingUp, iconColor: 'text-purple-500', countColor: 'text-purple-600' },
+          ].map(({ label, status, count, icon: Icon, iconColor, countColor }) => (
+            <Link
+              key={label}
+              to={status ? `/subscriptions?status=${status}` : '/subscriptions'}
+              aria-label={`View ${label.toLowerCase()} subscriptions`}
+              className="rounded-lg p-2 text-center transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
+            >
+              <div className="flex items-center justify-center mb-2">
+                <Icon className={`w-5 h-5 mr-1 ${iconColor}`} />
+                <span className="text-sm text-gray-600">{label}</span>
+              </div>
+              <p className={`text-xl font-bold ${countColor}`}>{formatNumber(count)}</p>
+            </Link>
+          ))}
         </div>
       </Card>
     </div>
