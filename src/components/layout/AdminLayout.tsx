@@ -143,10 +143,10 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex-1">
             {/* Brand header */}
             <div className="flex items-center space-x-3 px-2 py-2">
-              <img src="/crdb-logo.svg" alt="CRDB Bank" className="h-11 w-16 object-contain" />
+              <img src="/favicon.png" alt="NMB Bank" className="h-11 w-16 object-contain" />
               <div className="text-left">
                 <div className="text-base font-bold text-neutral-900">
-                  CRDB Admin
+                  NMB Admin
                 </div>
                 <div className="text-xs text-neutral-500 flex items-center space-x-1">
                   <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
@@ -156,7 +156,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
         ) : (
-          <img src="/crdb-logo.svg" alt="CRDB Bank" className="h-8 w-8 object-contain" />
+          <img src="/favicon.png" alt="NMB Bank" className="h-8 w-8 object-contain" />
         )}
         <Button
           variant="ghost"

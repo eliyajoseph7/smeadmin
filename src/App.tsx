@@ -211,7 +211,7 @@ function App() {
               },
               success: {
                 iconTheme: {
-                  primary: '#115635',
+                  primary: '#0B4D8C',
                   secondary: '#fff',
                 },
               },

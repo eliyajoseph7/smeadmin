@@ -911,7 +911,7 @@ export const BroadcastSmsPage: React.FC<BroadcastSmsPageProps> = ({ initialView 
         {activeView === 'BROADCAST_SMS' ? (
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)]">
           <Card className="overflow-hidden p-0">
-            <div className="border-b border-primary-700 bg-gradient-to-r from-[#115635] via-[#104c30] to-[#092c1d] px-6 py-6 text-white">
+            <div className="border-b border-primary-700 bg-gradient-to-r from-[#0B4D8C] via-[#0a437a] to-[#082746] px-6 py-6 text-white">
               <div className="flex items-start gap-4">
                 <div className="rounded-2xl bg-white/15 p-3 backdrop-blur-sm">
                   <MessageSquareText className="h-6 w-6" />

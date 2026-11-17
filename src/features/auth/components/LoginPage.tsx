@@ -132,7 +132,7 @@ const LoginPage: React.FC = () => {
               <div className="absolute inset-2 rounded-full bg-gradient-to-r from-primary-500/50 to-secondary-500/50 animate-spin" style={{ animationDuration: "8s" }}></div>
               {/* Inner Icon Container */}
               <div className="absolute inset-4 rounded-full bg-white flex items-center justify-center p-3 shadow-2xl">
-                <img src="/crdb-logo.svg" alt="CRDB Bank" className="w-full" />
+                <img src="/favicon.png" alt="NMB Bank" className="w-full rounded-full" />
               </div>
               {/* Floating Particles */}
               <div className="absolute -top-2 -right-2 w-4 h-4 bg-emerald-400 rounded-full animate-bounce shadow-lg"></div>
@@ -154,7 +154,7 @@ const LoginPage: React.FC = () => {
             
             <p className="text-gray-600 text-lg font-medium mt-6 max-w-md mx-auto lg:mx-0 leading-relaxed">
               Sign in to your 
-              <span className="text-primary-600 font-semibold"> CRDB Admin</span> dashboard and manage your business operations
+              <span className="text-primary-600 font-semibold"> NMB Admin</span> dashboard and manage your business operations
             </p>
           </div>
 
